@@ -31,10 +31,17 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
     }
 
-    public String addUser(User userInfo) {
+    public boolean addUser(User userInfo) {
+
+        // attempt to get user by email
+        Optional<User> user = repository.findByEmail(userInfo.getEmail());
+        if (user.isPresent()) {
+            return false;
+        }
+
         userInfo.setPassword(encoder.encode(userInfo.getPassword()));
         repository.save(userInfo);
-        return "User Added Successfully";
+        return true;
     }
 
 
