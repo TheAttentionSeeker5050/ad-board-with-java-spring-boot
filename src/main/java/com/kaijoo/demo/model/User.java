@@ -22,6 +22,10 @@ public class User {
     private String password;
     private String roles;
 
+    // const role types
+    public static final String ROLE_USER = "ROLE_USER";
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+
     public User(String name, String email, String password, String roles) {
         this.name = name;
         this.email = email;

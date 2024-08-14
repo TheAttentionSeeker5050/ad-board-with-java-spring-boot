@@ -33,6 +33,9 @@ public class UserService implements UserDetailsService {
 
     public boolean addUser(User userInfo) {
 
+        // add role user
+        userInfo.setRoles(User.ROLE_USER);
+
         // attempt to get user by email
         Optional<User> user = repository.findByEmail(userInfo.getEmail());
         if (user.isPresent()) {
