@@ -32,7 +32,7 @@ public class User {
     @OneToMany(mappedBy = "owner")
     private List<Post> posts;
 
-    // One-to-many relation with Conversation, a user can have many conversations
+    // Many-to-many relation with Conversation, a user can have many conversations and a conversation can have many (2) users
     @OneToMany(mappedBy = "users")
     private List<Conversation> conversations;
 

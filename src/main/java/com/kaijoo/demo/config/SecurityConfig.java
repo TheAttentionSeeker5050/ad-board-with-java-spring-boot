@@ -5,6 +5,7 @@ import com.kaijoo.demo.util.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -40,6 +41,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/welcome", "/auth/addNewUser", "/auth/generateToken").permitAll())
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/user/**").authenticated())
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/admin/**").authenticated())
+
+
+
+                // All post, put and delete requests require authentication
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST).authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.PUT).authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.DELETE).authenticated())
+
+                // Add the other controller requestMatchers here
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)

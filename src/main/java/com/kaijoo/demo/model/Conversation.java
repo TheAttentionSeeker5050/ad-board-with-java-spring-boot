@@ -22,12 +22,17 @@ public class Conversation {
     private String conversationID;
 
 
-    // one-to-many with Users, a conversation can have many users
-    @OneToMany(mappedBy = "conversation")
+    // Many-to-many relation with User, a conversation can have many (2) users and a user can have many conversations
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "conversation_user",
+            joinColumns = @JoinColumn(name = "conversation_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private List<User> users;
 
-    // one-to-one with Post, a conversation can have one post
-    @OneToOne
+    // One-to-many relation with Post, a post can have many conversations, but a conversation can have one post
+    @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
 

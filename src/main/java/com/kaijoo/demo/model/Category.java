@@ -22,7 +22,7 @@ public class Category {
     private String linkID;
 
     // One-to-many relation with SubCategory, a category can have many sub categories
-    @OneToMany(mappedBy = "sub_category")
+    @OneToMany(mappedBy = "category")
     private List<SubCategory> subCategories;
 
     // One-to-many relation with Post, a category can have many posts
