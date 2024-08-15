@@ -2,20 +2,17 @@ package com.kaijoo.demo.controller;
 
 import com.kaijoo.demo.dto.AuthResponse;
 import com.kaijoo.demo.dto.RegisterResponse;
-import com.kaijoo.demo.model.AuthRequest;
+import com.kaijoo.demo.dto.AuthRequest;
 import com.kaijoo.demo.model.User;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
-import java.awt.print.Printable;
 
 @RestController
 @RequestMapping("/auth")

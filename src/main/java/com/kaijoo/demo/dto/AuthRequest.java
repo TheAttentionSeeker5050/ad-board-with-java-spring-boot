@@ -1,4 +1,4 @@
-package com.kaijoo.demo.model;
+package com.kaijoo.demo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

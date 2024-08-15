@@ -1,31 +1,42 @@
 package com.kaijoo.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
+import java.util.List;
+
+@Setter
+@Getter
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "user")
 public class User {
 
+    // Getters and Setters
     @Id
+    @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
     private String email;
     private String password;
-    private String roles;
+    private String roles = ROLE_USER;
 
     // const role types
     public static final String ROLE_USER = "ROLE_USER";
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
+    // One-to-many relation with Post, a user can have many posts, but a post can have one user
+    @OneToMany(mappedBy = "owner")
+    private List<Post> posts;
+
+    // One-to-many relation with Conversation, a user can have many conversations
+    @OneToMany(mappedBy = "users")
+    private List<Conversation> conversations;
+
+    // Constructors
     public User(String name, String email, String password, String roles) {
         this.name = name;
         this.email = email;
@@ -33,45 +44,12 @@ public class User {
         this.roles = roles;
     }
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public User(String name, String email, String password) {
         this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
         this.password = password;
+        this.roles = ROLE_USER;
     }
 
-    public String getRoles() {
-        return roles;
-    }
-
-    public void setRoles(String roles) {
-        this.roles = roles;
-    }
 
 }

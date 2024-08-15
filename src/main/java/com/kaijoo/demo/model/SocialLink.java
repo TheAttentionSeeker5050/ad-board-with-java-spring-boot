@@ -9,31 +9,29 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "media_item")
-public class MediaItem {
+@Table(name = "social_link")
+public class SocialLink {
 
     // Getters and Setters
     @Id
+    @Column(name = "social_link_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "media_item_id")
     private int id;
-    private String itemType;
     private String link;
     private String iconLink;
-    private String title;
+    private String text;
     private String alt;
 
-    // One-to-many relation with Post, a media item can belong to many posts
+    // One-to-many relation with Post, a social link can belong to many posts
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
 
     // Constructor
-    public MediaItem(String itemType, String link, String iconLink, String title, String alt) {
-        this.itemType = itemType;
+    public SocialLink(String link, String iconLink, String text, String alt) {
         this.link = link;
         this.iconLink = iconLink;
-        this.title = title;
+        this.text = text;
         this.alt = alt;
     }
 
