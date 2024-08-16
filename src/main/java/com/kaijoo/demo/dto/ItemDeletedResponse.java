@@ -5,15 +5,14 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class RegisterResponse {
+public class ItemDeletedResponse {
     public String message;
     public String errorMessage;
-    public String authUrl;
+    public String parentUrl;
 
-    public RegisterResponse(String message, String errorMessage) {
+    public ItemDeletedResponse(String message, String errorMessage, String parentUrl) {
         this.message = message;
         this.errorMessage = errorMessage;
-        this.authUrl = "/auth/generateToken";
+        this.parentUrl = parentUrl;
     }
-
 }

@@ -1,14 +1,22 @@
 package com.kaijoo.demo.controller;
 
+import com.kaijoo.demo.dto.GetMultipleItemsResponse;
+import com.kaijoo.demo.dto.GetSingleItemsResponse;
+import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
+import com.kaijoo.demo.dto.ItemDeletedResponse;
 import com.kaijoo.demo.model.Tag;
 import com.kaijoo.demo.repository.TagRepository;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Iterator;
+import java.util.List;
 
 @Controller // This means that this class is a Controller
 @RequestMapping(path="/tags")
@@ -22,48 +30,188 @@ public class TagController {
     // Add a new tag, get the entity properties from the request body, received formatted as a json object,
     // receive a post request to /tags, no /add or anything else, just the base path
     @PostMapping(path="")
-    public @ResponseBody String addNewTag (@RequestBody Tag tag) {
+    public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> addNewTag (@RequestBody Tag tag) {
         try{
+            // Save the tag to the database
             tagRepository.save(tag);
-            return "Saved";
+
+            // Make the response content object
+            ItemCreatedOrUpdatedResponse response =
+                    new ItemCreatedOrUpdatedResponse("Item created successfully",
+                    null, "/tags", "/tags/by-id/" + tag.getId());
+
+            // return the response using ResponseEntity
+            return ResponseEntity.status(201).body(response);
+
+
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            // return a response with the error message and status code 400 if there is an error
+            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(null,
+                    "Error creating tag: " + e.getMessage(), "/tags", null);
+
+            return ResponseEntity.status(400).body(response);
         }
     }
 
     // Update a tag, get the entity properties from the request body, received formatted as a json object
     // receive a put request to /tags/{id}
     @PutMapping(path="/by-id/{id}")
-    public @ResponseBody String updateTag (@PathVariable int id, @RequestParam String name) {
-        Tag tag = tagRepository.findById(id).get();
-        tag.setName(name);
-        tagRepository.save(tag);
-        return "Updated";
+    public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> updateTag (@PathVariable int id, @RequestBody Tag tag) {
+        try{
+            // Set the id of the tag to the id in the path
+            tag.setId(id);
+
+            // Save the tag to the database
+            tagRepository.save(tag);
+
+            // Make the response content object
+            ItemCreatedOrUpdatedResponse response =
+                    new ItemCreatedOrUpdatedResponse("Item updated successfully",
+                            null, "/tags", "/tags/by-id/" + tag.getId());
+
+            // return the response using ResponseEntity
+            return ResponseEntity.status(200).body(response);
+
+        } catch (Exception e) {
+            // return a response with the error message and status code 400 if there is an error
+            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(null,
+                    "Error updating tag: " + e.getMessage(), "/tags", null);
+
+            return ResponseEntity.status(400).body(response);
+        }
     }
 
     // Delete a tag, receive a delete request to /tags/{id}
+    // Use deleted item response dto
     @DeleteMapping(path="/by-id/{id}")
-    public @ResponseBody String deleteTag (@PathVariable int id) {
-        tagRepository.deleteById(id);
-        return "Deleted";
+    public @ResponseBody ResponseEntity<ItemDeletedResponse> deleteTag (@PathVariable int id) {
+        try{
+            // Get the tag by id
+            Tag tag = tagRepository.findById(id).isEmpty() ? null : tagRepository.findById(id).get();
+
+            // if the tag is not found, return a response with the error message and status code 404
+            if (tag == null) {
+                ItemDeletedResponse response = new ItemDeletedResponse(
+                        "Tag not found", null, "/tags");
+
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // save the tag name and id into a string
+            String tagIdentifier = "tag " + tag.getName() + " with ID " + tag.getId();
+
+            // Delete the tag from the database
+            tagRepository.deleteById(id);
+
+            // Make the response content object
+            ItemDeletedResponse response = new ItemDeletedResponse("Item deleted successfully " + tagIdentifier,
+                    null, "/tags");
+
+            // return the response using ResponseEntity
+            return ResponseEntity.status(200).body(response);
+
+        } catch (Exception e) {
+            // Make the response object
+            ItemDeletedResponse response = new ItemDeletedResponse(null,
+                    "Error deleting tag: " + e.getMessage(), "/tags");
+
+            // return a response with the error message and status code 400 if there is an error
+            return ResponseEntity.status(400).body(response);
+        }
     }
 
     // Get all tags, receive a get request to /tags
     @GetMapping(path="")
-    public @ResponseBody Iterable<Tag> getAllTags() {
-        return tagRepository.findAll();
+    public @ResponseBody ResponseEntity<GetMultipleItemsResponse> getAllTags() {
+        try {
+            // Get all tags from the database, if it could not find any, return an empty list
+
+            List<Tag> tags = tagRepository.findAll().iterator().hasNext() ? (List<Tag>) tagRepository.findAll() : null;
+
+            // cast to list of tags, because
+            // the dto does not specify the type of the data field
+
+            // if there are no tags, return a response with the error message and status code 404
+            if (tags == null) {
+                GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                        "No tags found", "/tags", null);
+
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Make the response content object
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(null,
+                    "/tags", tags);
+
+            // return the response using ResponseEntity
+            return ResponseEntity.status(200).body(response);
+        } catch (Exception e) {
+            // return a response with the error message and status code 400 if there is an error
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    "Error getting tags: " + e.getMessage(), "/tags", null);
+
+            return ResponseEntity.status(400).body(response);
+        }
     }
 
     // Get a tag by id, receive a get request to /tags/{id}
     @GetMapping(path="/by-id/{id}")
-    public @ResponseBody Tag getTagById(@PathVariable int id) {
-        return tagRepository.findById(id).get();
+    public @ResponseBody ResponseEntity<GetSingleItemsResponse> getTagById(@PathVariable int id) {
+        try {
+            // Get the tag by id
+            Tag tag = tagRepository.findById(id).isEmpty() ? null : tagRepository.findById(id).get();
+
+            // if the tag is not found, return a response with the error message and status code 404
+            if (tag == null) {
+                GetSingleItemsResponse response = new GetSingleItemsResponse(
+                        "Tag not found", "/tags", null);
+
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Make the response content object
+            GetSingleItemsResponse response = new GetSingleItemsResponse(null,
+                    "/tags", tag);
+
+            // return the response using ResponseEntity
+            return ResponseEntity.status(200).body(response);
+        } catch (Exception e) {
+            // return a response with the error message and status code 400 if there is an error
+            GetSingleItemsResponse response = new GetSingleItemsResponse(
+                    "Error getting tag: " + e.getMessage(), "/tags", null);
+
+            return ResponseEntity.status(400).body(response);
+        }
     }
 
     // Get a tag by name, receive a get request to /tags/by-name/{name}
     @GetMapping(path="/by-name/{name}")
-    public @ResponseBody Tag getTagByName(@PathVariable String name) {
-        return tagRepository.findByName(name);
+    public @ResponseBody ResponseEntity<GetSingleItemsResponse> getTagByName(@PathVariable String name) {
+        try {
+            // Get the tag by name
+            Tag tag = tagRepository.findByName(name) == null ? null : tagRepository.findByName(name);
+
+            if (tag == null) {
+                // return a response with the error message and status code 404 if the tag is not found
+                GetSingleItemsResponse response = new GetSingleItemsResponse(
+                        "Tag not found", "/tags", null);
+
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Make the response content object
+            GetSingleItemsResponse response = new GetSingleItemsResponse(null,
+                    "/tags", tag);
+
+            // return the response using ResponseEntity
+            return ResponseEntity.status(200).body(response);
+        } catch (Exception e) {
+            // return a response with the error message and status code 400 if there is an error
+            GetSingleItemsResponse response = new GetSingleItemsResponse(
+                    "Error getting tag: " + e.getMessage(), "/tags", null);
+
+            return ResponseEntity.status(400).body(response);
+        }
     }
 
 }
