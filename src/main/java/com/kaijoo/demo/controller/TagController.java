@@ -32,6 +32,19 @@ public class TagController {
     @PostMapping(path="")
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> addNewTag (@RequestBody Tag tag) {
         try{
+
+            // First check if a tag already exists with the same name
+            Tag existingTag = tagRepository.findByName(tag.getName());
+
+            if (existingTag != null) {
+                // return a response with the error message and status code 400 if the tag already exists
+                ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                        "A tag with the same name already exists", null, "/tags", null);
+
+                return ResponseEntity.status(400).body(response);
+            }
+
+
             // Save the tag to the database
             tagRepository.save(tag);
 
@@ -58,6 +71,29 @@ public class TagController {
     @PutMapping(path="/by-id/{id}")
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> updateTag (@PathVariable int id, @RequestBody Tag tag) {
         try{
+
+            // First get the tag by id to see if it exists
+            Tag tagToUpdate = tagRepository.findById(id).isEmpty() ? null : tagRepository.findById(id).get();
+
+            if (tagToUpdate == null) {
+                // return a response with the error message and status code 404 if the tag is not found
+                ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                        "Tag not found", null, "/tags", null);
+
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Check if a tag with the same name already exists
+            Tag existingTag = tagRepository.findByName(tag.getName());
+
+            if (existingTag != null && existingTag.getId() != id) {
+                // return a response with the error message and status code 400 if the tag already exists
+                ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                        "A tag with the same name already exists", null, "/tags", null);
+
+                return ResponseEntity.status(400).body(response);
+            }
+
             // Set the id of the tag to the id in the path
             tag.setId(id);
 
@@ -126,18 +162,10 @@ public class TagController {
         try {
             // Get all tags from the database, if it could not find any, return an empty list
 
-            List<Tag> tags = tagRepository.findAll().iterator().hasNext() ? (List<Tag>) tagRepository.findAll() : null;
-
             // cast to list of tags, because
             // the dto does not specify the type of the data field
+            List<Tag> tags = tagRepository.findAll().iterator().hasNext() ? (List<Tag>) tagRepository.findAll() : null;
 
-            // if there are no tags, return a response with the error message and status code 404
-            if (tags == null) {
-                GetMultipleItemsResponse response = new GetMultipleItemsResponse(
-                        "No tags found", "/tags", null);
-
-                return ResponseEntity.status(404).body(response);
-            }
 
             // Make the response content object
             GetMultipleItemsResponse response = new GetMultipleItemsResponse(null,
@@ -164,21 +192,26 @@ public class TagController {
             // if the tag is not found, return a response with the error message and status code 404
             if (tag == null) {
                 GetSingleItemsResponse response = new GetSingleItemsResponse(
-                        "Tag not found", "/tags", null);
+                        "Tag not found",  null,  "/tags",null);
 
                 return ResponseEntity.status(404).body(response);
             }
 
             // Make the response content object
             GetSingleItemsResponse response = new GetSingleItemsResponse(null,
-                    "/tags", tag);
+                     "/tags/" + id,
+                    "/tags",
+                    tag);
 
             // return the response using ResponseEntity
             return ResponseEntity.status(200).body(response);
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
             GetSingleItemsResponse response = new GetSingleItemsResponse(
-                    "Error getting tag: " + e.getMessage(), "/tags", null);
+                    "Error getting tag: " + e.getMessage(),
+                     null,
+                    "/tags",
+                    null);
 
             return ResponseEntity.status(400).body(response);
         }
@@ -194,21 +227,24 @@ public class TagController {
             if (tag == null) {
                 // return a response with the error message and status code 404 if the tag is not found
                 GetSingleItemsResponse response = new GetSingleItemsResponse(
-                        "Tag not found", "/tags", null);
+                        "Tag not found", null, "/tags",null);
 
                 return ResponseEntity.status(404).body(response);
             }
 
             // Make the response content object
-            GetSingleItemsResponse response = new GetSingleItemsResponse(null,
-                    "/tags", tag);
+            GetSingleItemsResponse response = new GetSingleItemsResponse(
+                    null,
+                    "/tags/" + tag.getId(),
+                    "/tags",
+                    tag);
 
             // return the response using ResponseEntity
             return ResponseEntity.status(200).body(response);
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
             GetSingleItemsResponse response = new GetSingleItemsResponse(
-                    "Error getting tag: " + e.getMessage(), "/tags", null);
+                    "Error getting tag: " + e.getMessage(), null, "/tags", null);
 
             return ResponseEntity.status(400).body(response);
         }

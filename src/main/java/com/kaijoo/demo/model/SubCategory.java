@@ -1,5 +1,6 @@
 package com.kaijoo.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +28,7 @@ public class SubCategory
     // but a Category can have many SubCategories
     @ManyToOne
     @JoinColumn(name = "category_id")
+    @JsonIgnoreProperties("subCategories")
     private Category category;
 
     // One-to-many with Posts, a SubCategory can have many Posts, but a Post can only belong to one SubCategory

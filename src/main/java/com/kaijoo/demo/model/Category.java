@@ -1,5 +1,7 @@
 package com.kaijoo.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -23,6 +25,7 @@ public class Category {
 
     // One-to-many relation with SubCategory, a category can have many sub categories
     @OneToMany(mappedBy = "category")
+    @JsonIgnoreProperties("category")
     private List<SubCategory> subCategories;
 
     // One-to-many relation with Post, a category can have many posts
