@@ -38,7 +38,14 @@ public class JwtService {
     }
 
     public String extractEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+        String newToken = token;
+
+        // if token includes bearer <token> then remove bearer, by splitting the token in the space
+        if (token.startsWith("Bearer ")) {
+            newToken = token.split(" ")[1];
+        }
+
+        return extractClaim(newToken, Claims::getSubject);
     }
 
     public Date extractExpiration(String token) {
@@ -64,8 +71,15 @@ public class JwtService {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String email = extractEmail(token);
-        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        String newToken = token;
+
+        // if token includes bearer <token> then remove bearer, by splitting the token in the space
+        if (token.startsWith("Bearer ")) {
+            newToken = token.split(" ")[1];
+        }
+
+        final String email = extractEmail(newToken);
+        return (email.equals(userDetails.getUsername()) && !isTokenExpired(newToken));
     }
 
 

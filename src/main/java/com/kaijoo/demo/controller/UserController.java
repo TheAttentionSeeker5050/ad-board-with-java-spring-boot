@@ -58,7 +58,7 @@ public class UserController {
         try {
             // Extract email from token
             // take bearer out of token
-            String email = jwtService.extractEmail(token.substring(7));
+            String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
             UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
