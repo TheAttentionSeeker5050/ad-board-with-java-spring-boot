@@ -3,7 +3,9 @@ package com.kaijoo.demo.controller;
 import com.kaijoo.demo.dto.AuthResponse;
 import com.kaijoo.demo.dto.RegisterResponse;
 import com.kaijoo.demo.dto.AuthRequest;
+import com.kaijoo.demo.dto.UserInfoResponse;
 import com.kaijoo.demo.model.User;
+import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +49,33 @@ public class UserController {
         }
     }
 
+    // get token from header using Authorization: Bearer <token>
     @GetMapping("/user/userProfile")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public String userProfile() {
-        return "Welcome to User Profile";
+    public UserInfoResponse userProfile(@RequestHeader("Authorization") String token) {
+        UserInfoResponse response;
+
+        try {
+            // Extract email from token
+            // take bearer out of token
+            String email = jwtService.extractEmail(token.substring(7));
+
+            // build a json array with the information using the UserInfoDetails class object
+            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+
+
+            // return the json object
+            response = new UserInfoResponse(
+                    userInfoDetails.getUsername(),
+                    userInfoDetails.getAuthorities().toString()
+            );
+
+            return response;
+
+        } catch (Exception e) {
+            response = new UserInfoResponse(null, null, "Invalid token");
+            return response;
+        }
     }
 
     @GetMapping("/admin/adminProfile")
