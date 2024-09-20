@@ -66,6 +66,7 @@ public class UserController {
 
             // return the json object
             response = new UserInfoResponse(
+                    userInfoDetails.getId(),
                     userInfoDetails.getUsername(),
                     userInfoDetails.getAuthorities().toString()
             );
@@ -73,7 +74,7 @@ public class UserController {
             return response;
 
         } catch (Exception e) {
-            response = new UserInfoResponse(null, null, "Invalid token");
+            response = new UserInfoResponse(0, null, null, "Invalid token");
             return response;
         }
     }

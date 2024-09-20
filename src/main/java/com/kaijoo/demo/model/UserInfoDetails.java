@@ -1,5 +1,7 @@
 package com.kaijoo.demo.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,13 +11,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Setter
+@Getter
 public class UserInfoDetails implements UserDetails {
-
+    private int id = 0;
     private String email;
     private String password;
     private List<GrantedAuthority> authorities;
 
     public UserInfoDetails(User userInfo) {
+        id = userInfo.getId();
         email = userInfo.getEmail();
         password = userInfo.getPassword();
         authorities = Arrays.stream(userInfo.getRoles().split(","))
