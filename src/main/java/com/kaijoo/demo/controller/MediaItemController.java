@@ -90,7 +90,7 @@ public class MediaItemController {
         } catch (Exception e) {
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
                     null,
-                    "Error creating media item",
+                    "Error creating media item: " + e.getMessage(),
                     "/media-items",
                     null
             );
@@ -184,7 +184,7 @@ public class MediaItemController {
         } catch (Exception e) {
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
                     null,
-                    "Error updating media item",
+                    "Error updating media item: " + e.getMessage(),
                     "/media-items",
                     null
             );
@@ -262,7 +262,7 @@ public class MediaItemController {
         } catch (Exception e) {
             ItemDeletedResponse response = new ItemDeletedResponse(
                     null,
-                    "Error deleting media item",
+                    "Error deleting media item: " + e.getMessage(),
                     "/media-items"
             );
 
@@ -298,11 +298,10 @@ public class MediaItemController {
         if (mediaItem == null) {
             return ResponseEntity.badRequest().body(new GetSingleItemsResponse(
                     "Media item not found",
-                    "/media-items/by-id/" + id,
+                    null,
                     "/media-items",
                     null
             ));
-
         }
 
         // create a response object

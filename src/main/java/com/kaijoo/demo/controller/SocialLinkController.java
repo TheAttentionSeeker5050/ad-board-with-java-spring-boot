@@ -86,7 +86,7 @@ public class SocialLinkController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
                     null,
-                    "Error creating social link",
+                    "Error creating social link: " + e.getMessage(),
                     "/social-links",
                     null
             ));
@@ -135,7 +135,7 @@ public class SocialLinkController {
             if (socialLinkToUpdate == null) {
                 return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
                         null,
-                        "Social link not found",
+                        "Social link with id " + id + " not found",
                         "/social-links",
                         null
                 ));
@@ -172,7 +172,7 @@ public class SocialLinkController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
                     null,
-                    "Error updating social link",
+                    "Error updating social link: " + e.getMessage(),
                     "/social-links",
                     null
             ));
@@ -219,7 +219,7 @@ public class SocialLinkController {
             if (socialLinkToDelete == null) {
                 return ResponseEntity.badRequest().body(new ItemDeletedResponse(
                         null,
-                        "Social link not found",
+                        "Social link with id " + id + " not found",
                         "/social-links"
                 ));
             }
@@ -247,7 +247,7 @@ public class SocialLinkController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ItemDeletedResponse(
                     null,
-                    "Error deleting social link",
+                    "Error deleting social link: " + e.getMessage(),
                     "/social-links"
             ));
         }
@@ -262,7 +262,7 @@ public class SocialLinkController {
 
         if (socialLink == null) {
             return ResponseEntity.badRequest().body(new GetSingleItemsResponse(
-                    "Social link not found",
+                    "Social link with id " + id + " not found",
                     "/social-links/by-id/" + id,
                     "/social-links",
                     null

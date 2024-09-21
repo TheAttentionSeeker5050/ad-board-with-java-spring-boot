@@ -38,7 +38,8 @@ public class SubCategoryController {
             // Return the response
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
                     "Sub-category created successfully",
-                    null, "/sub-categories",
+                    null,
+                    "/sub-categories",
                     "/sub-categories/by-id/" + subCategory.getId());
 
             return ResponseEntity.created(
@@ -49,8 +50,9 @@ public class SubCategoryController {
         } catch (Exception e) {
             // Return the response
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
-                    "Error creating sub-category",
-                    e.getMessage(), "/sub-categories", null);
+                    null,
+                    "Error creating sub-category: " + e.getMessage(),
+                    "/sub-categories", null);
 
             return ResponseEntity.internalServerError().body(response);
         }
@@ -70,9 +72,10 @@ public class SubCategoryController {
             if (subCategoryToUpdate == null) {
                 // Return the response
                 ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
-                        "Sub-category not found",
+                        null,
                         "Sub-category with id " + id + " not found",
-                        "/sub-categories", null);
+                        "/sub-categories",
+                        null);
 
                 return ResponseEntity.status(404).body(response);
             }
@@ -88,7 +91,8 @@ public class SubCategoryController {
             // Return the response
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
                     "Sub-category updated successfully",
-                    null, "/sub-categories",
+                    null,
+                    "/sub-categories",
                     "/sub-categories/by-id/" + subCategoryToUpdate.getId());
 
             return ResponseEntity.ok(response);
@@ -96,8 +100,10 @@ public class SubCategoryController {
         } catch (Exception e) {
             // Return the response
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
-                    "Error updating sub-category",
-                    e.getMessage(), "/sub-categories", null);
+                    null,
+                    "Error updating sub-category: " +  e.getMessage(),
+                    "/sub-categories",
+                    null);
 
             return ResponseEntity.internalServerError().body(response);
 
@@ -139,7 +145,7 @@ public class SubCategoryController {
             // Return the response
             ItemDeletedResponse response = new ItemDeletedResponse(
                     null,
-                    "Error deleting sub-category" + e.getMessage(),
+                    "Error deleting sub-category: " + e.getMessage(),
                     "/sub-categories");
 
             return ResponseEntity.internalServerError().body(response);
@@ -159,7 +165,7 @@ public class SubCategoryController {
             if (subCategory == null) {
                 // Return the response
                 GetSingleItemsResponse response = new GetSingleItemsResponse(
-                        "Sub-category not found",
+                        "Sub-category with id " + id + " not found",
                          null,
                         "/sub-categories",
                         null);
@@ -200,7 +206,7 @@ public class SubCategoryController {
             if (subCategory == null) {
                 // Return the response
                 GetSingleItemsResponse response = new GetSingleItemsResponse(
-                        "Sub-category not found",
+                        "Sub-category with name " + name + " not found",
                          null,
                         "/sub-categories",
                         null);
@@ -208,7 +214,8 @@ public class SubCategoryController {
             }
 
             // Return the response
-            GetSingleItemsResponse response = new GetSingleItemsResponse(null,
+            GetSingleItemsResponse response = new GetSingleItemsResponse(
+                    null,
                      "/sub-categories/by-id/" + subCategory.getId(),
                     "/sub-categories",
                     subCategory);
@@ -238,15 +245,18 @@ public class SubCategoryController {
                     ? (List<SubCategory>) subCategoryRepository.findAll() : null;
 
             // Return the response
-            GetMultipleItemsResponse response = new GetMultipleItemsResponse(null,
-                    "/sub-categories", subCategories);
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    null,
+                    "/sub-categories",
+                    subCategories);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Return the response
             GetMultipleItemsResponse response = new GetMultipleItemsResponse(
                     "Error getting sub-categories: " + e.getMessage(),
-                    "/sub-categories", null);
+                    "/sub-categories",
+                    null);
 
             return ResponseEntity.badRequest().body(response);
         }

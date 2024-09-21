@@ -40,7 +40,10 @@ public class TagController {
             if (existingTag != null) {
                 // return a response with the error message and status code 400 if the tag already exists
                 ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
-                        "A tag with the same name already exists", null, "/tags", null);
+                        null,
+                        "A tag with the same name already exists",
+                        "/tags",
+                        null);
 
                 return ResponseEntity.badRequest().body(response);
             }
@@ -51,8 +54,12 @@ public class TagController {
 
             // Make the response content object
             ItemCreatedOrUpdatedResponse response =
-                    new ItemCreatedOrUpdatedResponse("Item created successfully",
-                    null, "/tags", "/tags/by-id/" + tag.getId());
+                    new ItemCreatedOrUpdatedResponse(
+                            "Item created successfully",
+                            null,
+                            "/tags",
+                            "/tags/by-id/" + tag.getId()
+                    );
 
             // return the response using ResponseEntity
             return ResponseEntity.created(
@@ -62,8 +69,12 @@ public class TagController {
 
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
-            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(null,
-                    "Error creating tag: " + e.getMessage(), "/tags", null);
+            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                    null,
+                    "Error creating tag: " + e.getMessage(),
+                    "/tags",
+                    null
+            );
 
             return ResponseEntity.badRequest().body(response);
         }
@@ -81,7 +92,10 @@ public class TagController {
             if (tagToUpdate == null) {
                 // return a response with the error message and status code 404 if the tag is not found
                 ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
-                        "Tag not found", null, "/tags", null);
+                        null,
+                        "Tag with ID " + id + " not found",
+                        "/tags",
+                        null);
 
                 return ResponseEntity.status(404).body(response);
             }
@@ -92,7 +106,11 @@ public class TagController {
             if (existingTag != null && existingTag.getId() != id) {
                 // return a response with the error message and status code 400 if the tag already exists
                 ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
-                        "A tag with the same name already exists", null, "/tags", null);
+                        null,
+                        "A tag with the same name already exists",
+                        "/tags",
+                        null
+                );
 
                 return ResponseEntity.badRequest().body(response);
             }
@@ -105,16 +123,24 @@ public class TagController {
 
             // Make the response content object
             ItemCreatedOrUpdatedResponse response =
-                    new ItemCreatedOrUpdatedResponse("Item updated successfully",
-                            null, "/tags", "/tags/by-id/" + tag.getId());
+                    new ItemCreatedOrUpdatedResponse(
+                            "Item updated successfully",
+                            null,
+                            "/tags",
+                            "/tags/by-id/" + tag.getId()
+                    );
 
             // return the response using ResponseEntity
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
-            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(null,
-                    "Error updating tag: " + e.getMessage(), "/tags", null);
+            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                    null,
+                    "Error updating tag: " + e.getMessage(),
+                    "/tags",
+                    null
+            );
 
             return ResponseEntity.badRequest().body(response);
         }
@@ -131,7 +157,9 @@ public class TagController {
             // if the tag is not found, return a response with the error message and status code 404
             if (tag == null) {
                 ItemDeletedResponse response = new ItemDeletedResponse(
-                        "Tag not found", null, "/tags");
+                        "Tag with ID " + id + " not found",
+                        null,
+                        "/tags");
 
                 return ResponseEntity.status(404).body(response);
             }
@@ -143,16 +171,20 @@ public class TagController {
             tagRepository.deleteById(id);
 
             // Make the response content object
-            ItemDeletedResponse response = new ItemDeletedResponse("Item deleted successfully " + tagIdentifier,
-                    null, "/tags");
+            ItemDeletedResponse response = new ItemDeletedResponse(
+                    "Item deleted successfully",
+                    null,
+                    "/tags");
 
             // return the response using ResponseEntity
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Make the response object
-            ItemDeletedResponse response = new ItemDeletedResponse(null,
-                    "Error deleting tag: " + e.getMessage(), "/tags");
+            ItemDeletedResponse response = new ItemDeletedResponse(
+                    null,
+                    "Error deleting tag: " + e.getMessage(),
+                    "/tags");
 
             // return a response with the error message and status code 400 if there is an error
             return ResponseEntity.badRequest().body(response);
@@ -182,7 +214,10 @@ public class TagController {
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
             GetMultipleItemsResponse response = new GetMultipleItemsResponse(
-                    "Error getting tags: " + e.getMessage(), "/tags", null);
+                    "Error getting tags: " + e.getMessage(),
+                    "/tags",
+                    null
+            );
 
             return ResponseEntity.badRequest().body(response);
         }
@@ -198,14 +233,18 @@ public class TagController {
             // if the tag is not found, return a response with the error message and status code 404
             if (tag == null) {
                 GetSingleItemsResponse response = new GetSingleItemsResponse(
-                        "Tag not found",  null,  "/tags",null);
+                        "Tag with ID " + id + " not found",
+                        null,
+                        "/tags",null
+                );
 
                 return ResponseEntity.status(404).body(response);
             }
 
             // Make the response content object
-            GetSingleItemsResponse response = new GetSingleItemsResponse(null,
-                     "/tags/" + id,
+            GetSingleItemsResponse response = new GetSingleItemsResponse(
+                    null,
+                    "/tags/" + id,
                     "/tags",
                     tag);
 
@@ -233,7 +272,11 @@ public class TagController {
             if (tag == null) {
                 // return a response with the error message and status code 404 if the tag is not found
                 GetSingleItemsResponse response = new GetSingleItemsResponse(
-                        "Tag not found", null, "/tags",null);
+                        "Tag with name " + name + " not found",
+                        null,
+                        "/tags",
+                        null
+                );
 
                 return ResponseEntity.status(404).body(response);
             }
@@ -250,7 +293,11 @@ public class TagController {
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
             GetSingleItemsResponse response = new GetSingleItemsResponse(
-                    "Error getting tag: " + e.getMessage(), null, "/tags", null);
+                    "Error getting tag: " + e.getMessage(),
+                    null,
+                    "/tags",
+                    null
+            );
 
             return ResponseEntity.badRequest().body(response);
         }

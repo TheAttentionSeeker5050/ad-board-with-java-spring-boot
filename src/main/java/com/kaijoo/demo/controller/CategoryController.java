@@ -4,6 +4,7 @@ package com.kaijoo.demo.controller;
 import com.kaijoo.demo.dto.GetMultipleItemsResponse;
 import com.kaijoo.demo.dto.GetSingleItemsResponse;
 import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
+import com.kaijoo.demo.dto.ItemDeletedResponse;
 import com.kaijoo.demo.model.Category;
 import com.kaijoo.demo.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,8 @@ public class CategoryController {
                         null,
                         "Another category with the same name already exists",
                         "/categories",
-                        null);
+                        null
+                );
 
                 return ResponseEntity.badRequest().body(response);
             }
@@ -129,7 +131,7 @@ public class CategoryController {
     // Delete a category
     // If the category has subcategories, don't allow deletion
     @DeleteMapping(path="/by-id/{id}")
-    public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> deleteCategory(
+    public @ResponseBody ResponseEntity<ItemDeletedResponse> deleteCategory(
             @PathVariable("id") Integer id) {
         try {
             // Check if the category exists
@@ -138,22 +140,22 @@ public class CategoryController {
 
             // If the category doesn't exist, return an error
             if (categoryToDelete == null) {
-                ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                ItemDeletedResponse response = new ItemDeletedResponse(
                         null,
                         "Category not found",
-                        "/categories",
-                        null);
+                        "/categories"
+                );
 
                 return ResponseEntity.status(404).body(response);
             }
 
             // Check if category has subcategories, if so, don't allow deletion
             if (!categoryToDelete.getSubCategories().isEmpty()) {
-                ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                ItemDeletedResponse response = new ItemDeletedResponse(
                         null,
                         "Please remove subcategories before deleting",
-                        "/categories",
-                        null);
+                        "/categories"
+                );
 
                 return ResponseEntity.badRequest().body(response);
             }
@@ -162,21 +164,21 @@ public class CategoryController {
             categoryRepository.delete(categoryToDelete);
 
             // Prepare the response
-            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+            ItemDeletedResponse response = new ItemDeletedResponse(
                     "Category deleted",
                     null,
-                    "/categories",
-                    null);
+                    "/categories"
+            );
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Prepare the response
-            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+            ItemDeletedResponse response = new ItemDeletedResponse(
                     null,
                     "Error deleting category: " + e.getMessage(),
-                    "/categories",
-                    null);
+                    "/categories"
+            );
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -219,7 +221,7 @@ public class CategoryController {
             // If the category doesn't exist, return an error
             if (category == null) {
                 GetSingleItemsResponse response = new GetSingleItemsResponse(
-                        "Category not found",
+                        "Category with id " + id + " not found",
                         null,
                         "/categories",
                         null);
@@ -258,7 +260,7 @@ public class CategoryController {
             // If the category doesn't exist, return an error
             if (category == null) {
                 GetSingleItemsResponse response = new GetSingleItemsResponse(
-                        "Category not found",
+                        "Category with name " + name + " not found",
                         null,
                         "/categories",
                         null);
