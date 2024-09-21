@@ -3,6 +3,8 @@ package com.kaijoo.demo.controller;
 import com.kaijoo.demo.dto.GetMultipleItemsResponse;
 import com.kaijoo.demo.dto.GetSingleItemsResponse;
 import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
+import com.kaijoo.demo.dto.ItemDeletedResponse;
+import com.kaijoo.demo.model.MediaItem;
 import com.kaijoo.demo.model.SocialLink;
 import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.repository.SocialLinkRepository;
@@ -65,6 +67,9 @@ public class SocialLinkController {
                 return ResponseEntity.status(401).body(response);
             }
 
+            // set the owner of the social link
+            socialLink.setOwner(userInfoDetails);
+
             // save the social link
             socialLinkRepository.save(socialLink);
 
@@ -90,14 +95,162 @@ public class SocialLinkController {
 
     // Update a social link
     @PutMapping(path="/by-id/{id}")
-    public String updateSocialLink() {
-        return "Social Link updated";
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> updateSocialLink(
+            @PathVariable int id,
+            @RequestHeader("Authorization") String token,
+            @RequestBody SocialLink socialLink
+    ) {
+        try {
+            // Extract email from token
+            // take bearer out of token
+            String email = jwtService.extractEmail(token.substring(7));
+
+            // build a json array with the information using the UserInfoDetails class object
+            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+
+            // validate the media item user
+            boolean userIsValid = jwtService.validateToken(
+                    token.substring(7),
+                    userInfoDetails
+            );
+
+            // If the user is not valid, return an error
+            if (!userIsValid) {
+                ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "User is not valid",
+                        "/media-items",
+                        null
+                );
+
+                return ResponseEntity.status(401).body(response);
+            }
+
+            // update the social link
+            SocialLink socialLinkToUpdate = socialLinkRepository.findById(id).isPresent() ?
+                    socialLinkRepository.findById(id).get() : null;
+
+            // check if the social link exists
+            if (socialLinkToUpdate == null) {
+                return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "Social link not found",
+                        "/social-links",
+                        null
+                ));
+            }
+
+            // check if the user is the owner of the social link
+            if (socialLinkToUpdate.getOwner().getId() != userInfoDetails.getId()) {
+                return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "User is not the owner of the social link",
+                        "/social-links",
+                        null
+                ));
+            }
+
+            // set the new values on all the fields except the id and owner
+            socialLinkToUpdate.setLink(socialLink.getLink());
+            socialLinkToUpdate.setIconLink(socialLink.getIconLink());
+            socialLinkToUpdate.setText(socialLink.getText());
+            socialLinkToUpdate.setAlt(socialLink.getAlt());
+
+            socialLinkRepository.save(socialLinkToUpdate);
+
+            // return a success response
+            ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                    "Social link updated",
+                    null,
+                    "/social-links",
+                    "/social-links/by-id/" + socialLinkToUpdate.getId()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
+                    null,
+                    "Error updating social link",
+                    "/social-links",
+                    null
+            ));
+        }
     }
 
     // Delete a social link
     @DeleteMapping(path="/by-id/{id}")
-    public String deleteSocialLink() {
-        return "Social Link deleted";
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public @ResponseBody ResponseEntity<ItemDeletedResponse> deleteSocialLink(
+            @PathVariable int id,
+            @RequestHeader("Authorization") String token
+    ) {
+        try {
+            // Extract email from token
+            // take bearer out of token
+            String email = jwtService.extractEmail(token.substring(7));
+
+            // build a json array with the information using the UserInfoDetails class object
+            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+
+            // validate the media item user
+            boolean userIsValid = jwtService.validateToken(
+                    token.substring(7),
+                    userInfoDetails
+            );
+
+            // If the user is not valid, return an error
+            if (!userIsValid) {
+                ItemDeletedResponse response = new ItemDeletedResponse(
+                        null,
+                        "User is not valid",
+                        "/media-items"
+                );
+
+                return ResponseEntity.status(401).body(response);
+            }
+
+            // delete the social link
+            SocialLink socialLinkToDelete = socialLinkRepository.findById(id).isPresent() ?
+                    socialLinkRepository.findById(id).get() : null;
+
+            // check if the social link exists
+            if (socialLinkToDelete == null) {
+                return ResponseEntity.badRequest().body(new ItemDeletedResponse(
+                        null,
+                        "Social link not found",
+                        "/social-links"
+                ));
+            }
+
+            // check if the user is the owner of the social link
+            if (socialLinkToDelete.getOwner().getId() != userInfoDetails.getId()) {
+                return ResponseEntity.badRequest().body(new ItemDeletedResponse(
+                        null,
+                        "User is not the owner of the social link",
+                        "/social-links"
+                ));
+            }
+
+            socialLinkRepository.delete(socialLinkToDelete);
+
+            // return a success response
+            ItemDeletedResponse response = new ItemDeletedResponse(
+                    "Social link deleted",
+                    null,
+                    "/social-links"
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ItemDeletedResponse(
+                    null,
+                    "Error deleting social link",
+                    "/social-links"
+            ));
+        }
     }
 
     // Get all social links
@@ -133,13 +286,14 @@ public class SocialLinkController {
     public @ResponseBody ResponseEntity<GetMultipleItemsResponse> getAllSocialLinks() {
 
         // get all social links from the database
-        Iterable<SocialLink> socialLinks = socialLinkRepository.findAll();
+        List<SocialLink> socialLinks = socialLinkRepository.findAll().iterator().hasNext() ?
+                (List<SocialLink>) socialLinkRepository.findAll() : null;
 
         // create a response object
         GetMultipleItemsResponse response = new GetMultipleItemsResponse(
                 (String) null,
                 "/social-links",
-                (List) socialLinks
+                socialLinks
         );
 
         // return the response object

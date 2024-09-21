@@ -38,7 +38,7 @@ public class CategoryController {
                         "/categories",
                         null);
 
-                return ResponseEntity.status(400).body(response);
+                return ResponseEntity.badRequest().body(response);
             }
 
             // Save the category
@@ -62,7 +62,7 @@ public class CategoryController {
                     "Error creating category: " + e.getMessage(),
                     "/categories",
                     null);
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -97,7 +97,7 @@ public class CategoryController {
                         "/categories",
                         null);
 
-                return ResponseEntity.status(400).body(response);
+                return ResponseEntity.badRequest().body(response);
             }
 
             if (category.getName() != null) categoryToUpdate.setName(category.getName());
@@ -122,7 +122,7 @@ public class CategoryController {
                     "Error updating category: " + e.getMessage(),
                     "/categories",
                     null);
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -155,7 +155,7 @@ public class CategoryController {
                         "/categories",
                         null);
 
-                return ResponseEntity.status(400).body(response);
+                return ResponseEntity.badRequest().body(response);
             }
 
             // Delete the category
@@ -177,7 +177,7 @@ public class CategoryController {
                     "Error deleting category: " + e.getMessage(),
                     "/categories",
                     null);
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -203,7 +203,7 @@ public class CategoryController {
                     "Error getting categories: " + e.getMessage(),
                     "/categories",
                     null);
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -243,7 +243,7 @@ public class CategoryController {
                     null,
                     "/categories",
                     null);
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -282,7 +282,7 @@ public class CategoryController {
                     null,
                     "/categories",
                     null);
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 }

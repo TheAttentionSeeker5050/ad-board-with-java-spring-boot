@@ -23,13 +23,21 @@ public class MediaItem {
     private String title;
     private String alt;
 
-    // One-to-many relation with Post, a media item can belong to many posts, but a post can have many media items
+    // One-to-one relation with User, a media item can belong to only one user
+    @OneToOne
+    @JoinColumn(name = "owner_id")
+    private UserInfoDetails owner;
+
+    // One-to-many relation with Post, a media item can belong to many posts,
+    // but a post can have many media items
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
 
     // Constructor
-    public MediaItem(String itemType, String link, String iconLink, String title, String alt) {
+    public MediaItem(
+            String itemType, String link, String iconLink, String title, String alt
+    ) {
         this.itemType = itemType;
         this.link = link;
         this.iconLink = iconLink;

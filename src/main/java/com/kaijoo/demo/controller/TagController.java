@@ -15,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class TagController {
                 ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
                         "A tag with the same name already exists", null, "/tags", null);
 
-                return ResponseEntity.status(400).body(response);
+                return ResponseEntity.badRequest().body(response);
             }
 
 
@@ -54,7 +55,9 @@ public class TagController {
                     null, "/tags", "/tags/by-id/" + tag.getId());
 
             // return the response using ResponseEntity
-            return ResponseEntity.status(201).body(response);
+            return ResponseEntity.created(
+                    new URI("/tags/by-id/" + tag.getId())
+            ).body(response);
 
 
         } catch (Exception e) {
@@ -62,7 +65,7 @@ public class TagController {
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(null,
                     "Error creating tag: " + e.getMessage(), "/tags", null);
 
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
@@ -91,7 +94,7 @@ public class TagController {
                 ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
                         "A tag with the same name already exists", null, "/tags", null);
 
-                return ResponseEntity.status(400).body(response);
+                return ResponseEntity.badRequest().body(response);
             }
 
             // Set the id of the tag to the id in the path
@@ -106,14 +109,14 @@ public class TagController {
                             null, "/tags", "/tags/by-id/" + tag.getId());
 
             // return the response using ResponseEntity
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(null,
                     "Error updating tag: " + e.getMessage(), "/tags", null);
 
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
@@ -144,7 +147,7 @@ public class TagController {
                     null, "/tags");
 
             // return the response using ResponseEntity
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Make the response object
@@ -152,7 +155,7 @@ public class TagController {
                     "Error deleting tag: " + e.getMessage(), "/tags");
 
             // return a response with the error message and status code 400 if there is an error
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
@@ -164,21 +167,24 @@ public class TagController {
 
             // cast to list of tags, because
             // the dto does not specify the type of the data field
-            List<Tag> tags = tagRepository.findAll().iterator().hasNext() ? (List<Tag>) tagRepository.findAll() : null;
-
+            List<Tag> tagsIterable = tagRepository.findAll().iterator().hasNext() ?
+                    (List<Tag>) tagRepository.findAll() : null;
 
             // Make the response content object
-            GetMultipleItemsResponse response = new GetMultipleItemsResponse(null,
-                    "/tags", tags);
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    null,
+                    "/tags",
+                    tagsIterable
+            );
 
             // return the response using ResponseEntity
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
             GetMultipleItemsResponse response = new GetMultipleItemsResponse(
                     "Error getting tags: " + e.getMessage(), "/tags", null);
 
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
@@ -204,7 +210,7 @@ public class TagController {
                     tag);
 
             // return the response using ResponseEntity
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
             GetSingleItemsResponse response = new GetSingleItemsResponse(
@@ -213,7 +219,7 @@ public class TagController {
                     "/tags",
                     null);
 
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
@@ -240,13 +246,13 @@ public class TagController {
                     tag);
 
             // return the response using ResponseEntity
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             // return a response with the error message and status code 400 if there is an error
             GetSingleItemsResponse response = new GetSingleItemsResponse(
                     "Error getting tag: " + e.getMessage(), null, "/tags", null);
 
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 

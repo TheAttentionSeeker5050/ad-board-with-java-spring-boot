@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @Controller // This means that this class is a Controller
@@ -40,7 +41,10 @@ public class SubCategoryController {
                     null, "/sub-categories",
                     "/sub-categories/by-id/" + subCategory.getId());
 
-            return ResponseEntity.status(201).body(response);
+            return ResponseEntity.created(
+                    new URI("/sub-categories/by-id/" + subCategory.getId())
+            ).body(response);
+
 
         } catch (Exception e) {
             // Return the response
@@ -48,7 +52,7 @@ public class SubCategoryController {
                     "Error creating sub-category",
                     e.getMessage(), "/sub-categories", null);
 
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -87,7 +91,7 @@ public class SubCategoryController {
                     null, "/sub-categories",
                     "/sub-categories/by-id/" + subCategoryToUpdate.getId());
 
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Return the response
@@ -95,7 +99,7 @@ public class SubCategoryController {
                     "Error updating sub-category",
                     e.getMessage(), "/sub-categories", null);
 
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
 
         }
     }
@@ -129,7 +133,7 @@ public class SubCategoryController {
                     null,
                     "/sub-categories");
 
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Return the response
@@ -138,7 +142,7 @@ public class SubCategoryController {
                     "Error deleting sub-category" + e.getMessage(),
                     "/sub-categories");
 
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -168,7 +172,7 @@ public class SubCategoryController {
                     "/sub-categories/by-id/" + subCategory.getId(),
                     "/sub-categories",
                     subCategory);
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Return the response
@@ -178,7 +182,7 @@ public class SubCategoryController {
                     "/sub-categories",
                     null);
 
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
@@ -208,7 +212,7 @@ public class SubCategoryController {
                      "/sub-categories/by-id/" + subCategory.getId(),
                     "/sub-categories",
                     subCategory);
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Return the response
@@ -218,7 +222,7 @@ public class SubCategoryController {
                     "/sub-categories",
                     null);
 
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
@@ -236,7 +240,7 @@ public class SubCategoryController {
             // Return the response
             GetMultipleItemsResponse response = new GetMultipleItemsResponse(null,
                     "/sub-categories", subCategories);
-            return ResponseEntity.status(200).body(response);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             // Return the response
@@ -244,7 +248,7 @@ public class SubCategoryController {
                     "Error getting sub-categories: " + e.getMessage(),
                     "/sub-categories", null);
 
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
