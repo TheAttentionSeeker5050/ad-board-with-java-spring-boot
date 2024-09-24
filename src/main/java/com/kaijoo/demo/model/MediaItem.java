@@ -1,5 +1,6 @@
 package com.kaijoo.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,9 +25,11 @@ public class MediaItem {
     private String alt;
 
     // One-to-one relation with User, a media item can belong to only one user
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "owner_id")
-    private UserInfoDetails owner;
+    // ignore multiple references to the same object
+    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks"})
+    private User owner;
 
     // One-to-many relation with Post, a media item can belong to many posts,
     // but a post can have many media items

@@ -6,6 +6,7 @@ import com.kaijoo.demo.dto.GetSingleItemsResponse;
 import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
 import com.kaijoo.demo.dto.ItemDeletedResponse;
 import com.kaijoo.demo.model.MediaItem;
+import com.kaijoo.demo.model.User;
 import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.repository.MediaItemRepository;
 import com.kaijoo.demo.service.JwtService;
@@ -69,9 +70,14 @@ public class MediaItemController {
             }
 
 
+            // Set the owner of the media item
+            // cast the UserInfoDetails object to a User object
+            User owner = new User();
+
+            owner.setId(userInfoDetails.getId());
 
             // add owner to media item
-            mediaItem.setOwner(userInfoDetails);
+            mediaItem.setOwner(owner);
 
            // Save the media item
             mediaItemRepository.save(mediaItem);

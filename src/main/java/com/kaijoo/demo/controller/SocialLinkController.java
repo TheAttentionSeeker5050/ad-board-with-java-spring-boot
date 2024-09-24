@@ -6,6 +6,7 @@ import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
 import com.kaijoo.demo.dto.ItemDeletedResponse;
 import com.kaijoo.demo.model.MediaItem;
 import com.kaijoo.demo.model.SocialLink;
+import com.kaijoo.demo.model.User;
 import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.repository.SocialLinkRepository;
 import com.kaijoo.demo.service.JwtService;
@@ -67,8 +68,16 @@ public class SocialLinkController {
                 return ResponseEntity.status(401).body(response);
             }
 
+
+            // Set the owner of the social link
+            // cast the UserInfoDetails object to a User object
+            User owner = new User();
+
+            owner.setId(userInfoDetails.getId());
+
+
             // set the owner of the social link
-            socialLink.setOwner(userInfoDetails);
+            socialLink.setOwner(owner);
 
             // save the social link
             socialLinkRepository.save(socialLink);

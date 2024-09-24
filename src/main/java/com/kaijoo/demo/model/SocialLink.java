@@ -1,5 +1,6 @@
 package com.kaijoo.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,9 +24,10 @@ public class SocialLink {
     private String alt;
 
     // One-to-one relation with User, a media item can belong to only one user
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "owner_id")
-    private UserInfoDetails owner;
+    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks"})
+    private User owner;
 
     // One-to-many relation with Post, a social link can belong to many posts
     @ManyToOne

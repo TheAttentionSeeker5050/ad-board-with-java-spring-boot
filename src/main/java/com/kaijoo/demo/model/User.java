@@ -1,5 +1,6 @@
 package com.kaijoo.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,18 @@ public class User {
     // One-to-many relation with Post, a user can have many posts, but a post can have one user
     @OneToMany(mappedBy = "owner")
     private List<Post> posts;
+
+    // One-to-many relation with MediaItem, a user can have many media items, but a media item can have one user
+    @OneToMany(mappedBy = "owner")
+    @JsonIgnoreProperties("owner")
+    private List<MediaItem> mediaItems;
+
+    // One-to-many relation with SocialLink, a user can have many social links, but a social link can have one user
+    // avoid circular reference by avoiding owner inside SocialLink
+    @OneToMany(mappedBy = "owner")
+    @JsonIgnoreProperties("owner")
+    private List<SocialLink> socialLinks;
+
 
     // Many-to-many relation with Conversation, a user can have many conversations and a conversation can have many (2) users
     @OneToMany(mappedBy = "users")
