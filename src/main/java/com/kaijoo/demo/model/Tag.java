@@ -1,8 +1,13 @@
 package com.kaijoo.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jdk.jfr.Recording;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+import org.springframework.data.web.PageableDefault;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +29,9 @@ public class Tag {
     private String name;
 
 
-    @ManyToMany(mappedBy = "tags")
+    // Limit the amount of post to just 10
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"mediaItems", "socialLinks", "owner", "tags", "subCategory", "category", "conversations"})
     private List<Post> posts;
 
     public Tag(String name) {

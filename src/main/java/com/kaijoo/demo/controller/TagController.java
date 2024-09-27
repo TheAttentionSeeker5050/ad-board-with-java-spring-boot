@@ -4,11 +4,16 @@ import com.kaijoo.demo.dto.GetMultipleItemsResponse;
 import com.kaijoo.demo.dto.GetSingleItemsResponse;
 import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
 import com.kaijoo.demo.dto.ItemDeletedResponse;
+import com.kaijoo.demo.model.Post;
 import com.kaijoo.demo.model.Tag;
+import com.kaijoo.demo.repository.PaginatedPostRepository;
+import com.kaijoo.demo.repository.PostRepository;
 import com.kaijoo.demo.repository.TagRepository;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +31,10 @@ public class TagController {
     // Initiate the tag repository
     @Autowired
     private TagRepository tagRepository;
+
+    // initiate the post repository
+    @Autowired
+    private PaginatedPostRepository postRepository;
 
 
     // Add a new tag, get the entity properties from the request body, received formatted as a json object,
@@ -199,14 +208,27 @@ public class TagController {
 
             // cast to list of tags, because
             // the dto does not specify the type of the data field
-            List<Tag> tagsIterable = tagRepository.findAll().iterator().hasNext() ?
+            List<Tag> tags = tagRepository.findAll().iterator().hasNext() ?
                     (List<Tag>) tagRepository.findAll() : null;
+
+
+            if (tags != null) {
+                // For each tag, manually load and set the posts
+                for (Tag tag : tags) {
+                    // Fetch only the limited posts (e.g., the last 10) for each tag using pagination
+                    Pageable pageable = PageRequest.of(0, 10);
+                    List<Post> limitedPosts = postRepository.findByTagId(tag.getId(), pageable);
+
+                    // Set the limited posts to the tag object manually
+                    tag.setPosts(limitedPosts);
+                }
+            }
 
             // Make the response content object
             GetMultipleItemsResponse response = new GetMultipleItemsResponse(
                     null,
                     "/tags",
-                    tagsIterable
+                    tags
             );
 
             // return the response using ResponseEntity

@@ -26,12 +26,13 @@ public class SocialLink {
     // One-to-one relation with User, a media item can belong to only one user
     @ManyToOne
     @JoinColumn(name = "owner_id")
-    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks"})
+    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks", "conversations"})
     private User owner;
 
     // One-to-many relation with Post, a social link can belong to many posts
     @ManyToOne
     @JoinColumn(name = "post_id")
+    @JsonIgnoreProperties({"mediaItems", "socialLinks", "owner", "tags", "subCategory", "category", "conversations"})
     private Post post;
 
     // Constructor

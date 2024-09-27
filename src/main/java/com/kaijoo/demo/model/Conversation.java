@@ -1,5 +1,6 @@
 package com.kaijoo.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,11 +30,13 @@ public class Conversation {
             joinColumns = @JoinColumn(name = "conversation_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks", "conversations"})
     private List<User> users;
 
     // One-to-many relation with Post, a post can have many conversations, but a conversation can have one post
     @ManyToOne
     @JoinColumn(name = "post_id")
+    @JsonIgnoreProperties({"mediaItems", "socialLinks", "owner", "tags", "subCategory", "category", "conversations"})
     private Post post;
 
     public Conversation(String conversationID)

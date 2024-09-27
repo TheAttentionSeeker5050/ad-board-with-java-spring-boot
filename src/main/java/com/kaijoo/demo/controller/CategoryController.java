@@ -103,7 +103,6 @@ public class CategoryController {
             }
 
             if (category.getName() != null) categoryToUpdate.setName(category.getName());
-            if (category.getLinkID() != null) categoryToUpdate.setLinkID(category.getLinkID());
 
             // Update the category
             categoryRepository.save(categoryToUpdate);

@@ -32,7 +32,7 @@ public class SocialLinkController {
     private JwtService jwtService;
 
     @Autowired
-    private UserService service;
+    private UserService userService;
 
     // The routes will be added here
     // Create a social link
@@ -48,7 +48,7 @@ public class SocialLinkController {
             String email = jwtService.extractEmail(token.substring(7));
 
             // build a json array with the information using the UserInfoDetails class object
-            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+            UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(
@@ -116,7 +116,7 @@ public class SocialLinkController {
             String email = jwtService.extractEmail(token.substring(7));
 
             // build a json array with the information using the UserInfoDetails class object
-            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+            UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(
@@ -166,6 +166,11 @@ public class SocialLinkController {
             socialLinkToUpdate.setText(socialLink.getText());
             socialLinkToUpdate.setAlt(socialLink.getAlt());
 
+            // if post, set post
+            if (socialLink.getPost() != null) {
+                socialLinkToUpdate.setPost(socialLink.getPost());
+            }
+
             socialLinkRepository.save(socialLinkToUpdate);
 
             // return a success response
@@ -201,7 +206,7 @@ public class SocialLinkController {
             String email = jwtService.extractEmail(token.substring(7));
 
             // build a json array with the information using the UserInfoDetails class object
-            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+            UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(

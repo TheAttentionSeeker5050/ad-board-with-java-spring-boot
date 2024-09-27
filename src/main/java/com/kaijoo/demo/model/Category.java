@@ -21,21 +21,20 @@ public class Category {
     @Column(name = "category_id")
     private int id;
     private String name;
-    private String linkID;
 
     // One-to-many relation with SubCategory, a category can have many sub categories
     @OneToMany(mappedBy = "category")
-    @JsonIgnoreProperties("category")
+    @JsonIgnoreProperties({"category", "posts"})
     private List<SubCategory> subCategories;
 
     // One-to-many relation with Post, a category can have many posts
     @OneToMany(mappedBy = "category")
+    @JsonIgnoreProperties({"mediaItems", "socialLinks", "owner", "tags", "subCategory", "category", "conversations"})
     private List<Post> posts;
 
     // Constructor
-    public Category(String name, String linkID) {
+    public Category(String name) {
         this.name = name;
-        this.linkID = linkID;
     }
 
 

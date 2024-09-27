@@ -22,23 +22,22 @@ public class SubCategory
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    private String linkID;
 
     // One-to-many with Categories, a SubCategory can only belong to one Category,
     // but a Category can have many SubCategories
     @ManyToOne
     @JoinColumn(name = "category_id")
-    @JsonIgnoreProperties("subCategories")
+    @JsonIgnoreProperties({"subCategories", "posts"})
     private Category category;
 
     // One-to-many with Posts, a SubCategory can have many Posts, but a Post can only belong to one SubCategory
     @OneToMany(mappedBy = "subCategory")
+    @JsonIgnoreProperties({"mediaItems", "socialLinks", "owner", "tags", "subCategory", "category", "conversations"})
     private List<Post> posts;
 
-    public SubCategory(String name, String linkID)
+    public SubCategory(String name)
     {
         this.name = name;
-        this.linkID = linkID;
     }
 
 }

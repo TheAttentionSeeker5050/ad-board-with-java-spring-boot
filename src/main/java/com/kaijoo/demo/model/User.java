@@ -31,17 +31,18 @@ public class User {
 
     // One-to-many relation with Post, a user can have many posts, but a post can have one user
     @OneToMany(mappedBy = "owner")
+    @JsonIgnoreProperties({"mediaItems", "socialLinks", "owner", "tags", "subCategory", "category", "conversations"})
     private List<Post> posts;
 
     // One-to-many relation with MediaItem, a user can have many media items, but a media item can have one user
     @OneToMany(mappedBy = "owner")
-    @JsonIgnoreProperties("owner")
+    @JsonIgnoreProperties({"owner", "post"})
     private List<MediaItem> mediaItems;
 
     // One-to-many relation with SocialLink, a user can have many social links, but a social link can have one user
     // avoid circular reference by avoiding owner inside SocialLink
     @OneToMany(mappedBy = "owner")
-    @JsonIgnoreProperties("owner")
+    @JsonIgnoreProperties({"owner", "post"})
     private List<SocialLink> socialLinks;
 
 

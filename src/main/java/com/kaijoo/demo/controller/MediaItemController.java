@@ -32,7 +32,7 @@ public class MediaItemController {
     private JwtService jwtService;
 
     @Autowired
-    private UserService service;
+    private UserService userService;
 
 
     // The routes will be added here
@@ -49,7 +49,7 @@ public class MediaItemController {
             String email = jwtService.extractEmail(token.substring(7));
 
             // build a json array with the information using the UserInfoDetails class object
-            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+            UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(
@@ -120,7 +120,7 @@ public class MediaItemController {
             String email = jwtService.extractEmail(token.substring(7));
 
             // build a json array with the information using the UserInfoDetails class object
-            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+            UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(
@@ -175,6 +175,11 @@ public class MediaItemController {
             mediaItemToUpdate.setTitle(mediaItem.getTitle());
             mediaItemToUpdate.setAlt(mediaItem.getAlt());
 
+            // If post is present, save it to media item
+            if (mediaItem.getPost() != null) {
+                mediaItemToUpdate.setPost(mediaItem.getPost());
+            }
+
             // save the updated media item
             mediaItemRepository.save(mediaItemToUpdate);
 
@@ -212,7 +217,7 @@ public class MediaItemController {
             String email = jwtService.extractEmail(token.substring(7));
 
             // build a json array with the information using the UserInfoDetails class object
-            UserInfoDetails userInfoDetails = (UserInfoDetails) service.loadUserByUsername(email);
+            UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(

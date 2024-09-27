@@ -82,7 +82,6 @@ public class SubCategoryController {
 
             // Update the sub-category, if any of the fields are null, keep the old value
             if (subCategory.getName() != null)  subCategoryToUpdate.setName(subCategory.getName());
-            if (subCategory.getLinkID() != null)  subCategoryToUpdate.setLinkID(subCategory.getLinkID());
             if (subCategory.getCategory() != null)  subCategoryToUpdate.setCategory(subCategory.getCategory());
 
             // Save the sub-category

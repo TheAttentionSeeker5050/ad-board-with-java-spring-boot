@@ -28,13 +28,14 @@ public class MediaItem {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     // ignore multiple references to the same object
-    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks"})
+    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks", "conversations"})
     private User owner;
 
     // One-to-many relation with Post, a media item can belong to many posts,
     // but a post can have many media items
     @ManyToOne
     @JoinColumn(name = "post_id")
+    @JsonIgnoreProperties({"mediaItems", "socialLinks", "owner", "tags", "subCategory", "category", "conversations"})
     private Post post;
 
     // Constructor
