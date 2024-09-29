@@ -11,6 +11,7 @@ import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.repository.SocialLinkRepository;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,20 +40,20 @@ public class SocialLinkController {
     @PostMapping(path="")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> createSocialLink(
-            @RequestHeader("Authorization") String token,
+            HttpServletRequest request,
             @RequestBody SocialLink socialLink
     ) {
         try {
-            // Extract email from token
-            // take bearer out of token
-            String email = jwtService.extractEmail(token.substring(7));
+            // Retrieve the JWT from cookies
+            String token = jwtService.getTokenFromCookies(request.getCookies());
+            String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
             UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(
-                    token.substring(7),
+                    token,
                     userInfoDetails
             );
 
@@ -107,20 +108,20 @@ public class SocialLinkController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> updateSocialLink(
             @PathVariable int id,
-            @RequestHeader("Authorization") String token,
+            HttpServletRequest request,
             @RequestBody SocialLink socialLink
     ) {
         try {
-            // Extract email from token
-            // take bearer out of token
-            String email = jwtService.extractEmail(token.substring(7));
+            // Retrieve the JWT from cookies
+            String token = jwtService.getTokenFromCookies(request.getCookies());
+            String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
             UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(
-                    token.substring(7),
+                    token,
                     userInfoDetails
             );
 
@@ -198,19 +199,19 @@ public class SocialLinkController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public @ResponseBody ResponseEntity<ItemDeletedResponse> deleteSocialLink(
             @PathVariable int id,
-            @RequestHeader("Authorization") String token
+            HttpServletRequest request
     ) {
         try {
-            // Extract email from token
-            // take bearer out of token
-            String email = jwtService.extractEmail(token.substring(7));
+            // Retrieve the JWT from cookies
+            String token = jwtService.getTokenFromCookies(request.getCookies());
+            String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
             UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
 
             // validate the media item user
             boolean userIsValid = jwtService.validateToken(
-                    token.substring(7),
+                    token,
                     userInfoDetails
             );
 

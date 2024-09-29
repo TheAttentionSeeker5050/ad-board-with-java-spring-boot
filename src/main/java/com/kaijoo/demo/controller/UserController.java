@@ -8,6 +8,9 @@ import com.kaijoo.demo.model.User;
 import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,16 +37,22 @@ public class UserController {
         return "Welcome this endpoint is not secure";
     }
 
-    @PostMapping("/addNewUser")
+    // this does not require a token
+    @PostMapping("/register")
     public RegisterResponse addNewUser(@RequestBody User userInfo) {
-        boolean result = service.addUser(userInfo);
-
         RegisterResponse response;
 
-        if (result) {
-            response = new RegisterResponse("User added successfully", null);
-            return response;
-        } else {
+        try {
+            boolean result = service.addUser(userInfo);
+
+            if (result) {
+                response = new RegisterResponse("User added successfully", null);
+                return response;
+            } else {
+                response = new RegisterResponse(null, "User already exists");
+                return response;
+            }
+        } catch (Exception e) {
             response = new RegisterResponse(null, "User already exists");
             return response;
         }
@@ -52,12 +61,14 @@ public class UserController {
     // get token from header using Authorization: Bearer <token>
     @GetMapping("/user/userProfile")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public UserInfoResponse userProfile(@RequestHeader("Authorization") String token) {
+    public UserInfoResponse userProfile(HttpServletRequest request) {
         UserInfoResponse response;
 
         try {
-            // Extract email from token
-            // take bearer out of token
+            // Retrieve the JWT from cookies
+            String token = jwtService.getTokenFromCookies(request.getCookies());
+
+            // Extract the email from the token
             String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
@@ -86,24 +97,60 @@ public class UserController {
     }
 
     @PostMapping("/generateToken")
-    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
         // use dto AuthResponse to return a json object
-        AuthResponse response;
+        AuthResponse authResponse;
+
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequest.getEmail(),
+                            authRequest.getPassword()
+                    ));
+
             if (authentication.isAuthenticated()) {
                 String authToken = jwtService.generateToken(authRequest.getEmail());
 
-                response = new AuthResponse(authToken, null);
-                return response;
+                // Create the cookie for the JWT token
+                Cookie jwtCookie = new Cookie("AUTH_TOKEN", authToken);
+                jwtCookie.setHttpOnly(true); // Prevents JavaScript access
+                jwtCookie.setSecure(true); // Use this if your app is running over HTTPS
+                jwtCookie.setPath("/"); // Set the cookie path
+                jwtCookie.setMaxAge(60 * 60); // Set cookie expiration time (1 hour as an example)
+
+                // Add the cookie to the response
+                response.addCookie(jwtCookie);
+
+                // Return a success response without the token
+                authResponse = new AuthResponse(null, null, "Login Successful");
+                return authResponse;
             }
 
-            response = new AuthResponse(null, "Invalid credentials");
-            return response;
+            authResponse = new AuthResponse(null, "Invalid credentials");
+            return authResponse;
 
         } catch (UsernameNotFoundException e) {
+            authResponse = new AuthResponse(null, "User not found");
+            return authResponse;
+        }
+    }
 
-            response = new AuthResponse(null, "User not found");
+    // renew token
+    @PostMapping("/renewToken")
+    public AuthResponse renewToken(HttpServletRequest request) {
+        AuthResponse response;
+        try {
+            // Get the token from the cookies
+            String token = jwtService.getTokenFromCookies(request.getCookies());
+
+            // Renew the token
+            String newToken = jwtService.renewToken(token);
+
+            response = new AuthResponse(newToken, null);
+            return response;
+
+        } catch (Exception e) {
+            response = new AuthResponse(null, "Invalid token");
             return response;
         }
     }
