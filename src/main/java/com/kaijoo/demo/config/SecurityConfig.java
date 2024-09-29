@@ -111,7 +111,6 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         configuration.setAllowedHeaders(List.of("*")); // Allowed headers
         configuration.setAllowCredentials(true); // Allow credentials like cookies or authorization headers
-//        configuration.setExposedHeaders(List.of("Authorization")); // Expose headers to the client
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // Apply CORS settings to all endpoints

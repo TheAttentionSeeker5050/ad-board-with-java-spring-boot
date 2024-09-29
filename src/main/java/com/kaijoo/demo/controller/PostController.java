@@ -49,7 +49,7 @@ public class PostController {
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> createPost(
             HttpServletRequest request,
             @RequestBody Post post
-            ) {
+    ) {
         try {
             // Retrieve the JWT from cookies
             String token = jwtService.getTokenFromCookies(request.getCookies());
