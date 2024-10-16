@@ -7,6 +7,7 @@ import com.kaijoo.demo.dto.ItemDeletedResponse;
 import com.kaijoo.demo.model.*;
 import com.kaijoo.demo.repository.PostRepository;
 import com.kaijoo.demo.repository.SocialLinkRepository;
+import com.kaijoo.demo.repository.UserRepository;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class SocialLinkController {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private JwtService jwtService;
@@ -74,11 +78,21 @@ public class SocialLinkController {
 
             // Set the owner of the social link
             // cast the UserInfoDetails object to a User object
-            User owner = new User();
+            User owner = userRepository.findById(userInfoDetails.getId()).isPresent() ?
+                    userRepository.findById(userInfoDetails.getId()).get() : null;
 
-            owner.setId(userInfoDetails.getId());
+            // If the owner does not exist, return an error
+            if (owner == null) {
+                return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "User owner not found",
+                        "/social-links",
+                        null
+                ));
+            }
 
-            System.out.println("Post id: " + socialLink.getPost());
+            // set the owner of the social link
+            socialLink.setOwner(owner);
 
             // Explicitly set the post
             // Use the post id to find the post in the database
@@ -99,6 +113,8 @@ public class SocialLinkController {
                         socialLink.setPost(post);
                     }
                 }
+            } else {
+                socialLink.setPost(null);
             }
 
 

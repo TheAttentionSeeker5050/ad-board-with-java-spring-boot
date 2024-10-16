@@ -11,6 +11,7 @@ import com.kaijoo.demo.model.User;
 import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.repository.MediaItemRepository;
 import com.kaijoo.demo.repository.PostRepository;
+import com.kaijoo.demo.repository.UserRepository;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class MediaItemController {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private JwtService jwtService;
@@ -77,14 +81,24 @@ public class MediaItemController {
 
             // Set the owner of the media item
             // cast the UserInfoDetails object to a User object
-            User owner = new User();
+            User owner = userRepository.findById(userInfoDetails.getId()).isPresent() ?
+                    userRepository.findById(userInfoDetails.getId()).get() : null;
 
-            owner.setId(userInfoDetails.getId());
+            // if user is not found, return an error
+            if (owner == null) {
+                ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "User owner not found",
+                        "/media-items",
+                        null
+                );
+
+                return ResponseEntity.badRequest().body(response);
+            }
 
             // add owner to media item
             mediaItem.setOwner(owner);
 
-            System.out.println("Media item post: " + mediaItem.getPost());
             // Explicitly set the post
             // Use the post id to get the post from the database
             if (mediaItem.getPost() != null) {
@@ -103,6 +117,8 @@ public class MediaItemController {
                         mediaItem.setPost(post);
                     }
                 }
+            } else {
+                mediaItem.setPost(null);
             }
 
            // Save the media item
