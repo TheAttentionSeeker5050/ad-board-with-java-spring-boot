@@ -6,9 +6,11 @@ import com.kaijoo.demo.dto.GetSingleItemsResponse;
 import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
 import com.kaijoo.demo.dto.ItemDeletedResponse;
 import com.kaijoo.demo.model.MediaItem;
+import com.kaijoo.demo.model.Post;
 import com.kaijoo.demo.model.User;
 import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.repository.MediaItemRepository;
+import com.kaijoo.demo.repository.PostRepository;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class MediaItemController {
     // Add media item repository here
     @Autowired
     private MediaItemRepository mediaItemRepository;
+
+    @Autowired
+    private PostRepository postRepository;
 
     @Autowired
     private JwtService jwtService;
@@ -78,6 +83,27 @@ public class MediaItemController {
 
             // add owner to media item
             mediaItem.setOwner(owner);
+
+            System.out.println("Media item post: " + mediaItem.getPost());
+            // Explicitly set the post
+            // Use the post id to get the post from the database
+            if (mediaItem.getPost() != null) {
+                // Make sure that the owner of the post is the same as the user
+                Post post = postRepository.findById(mediaItem.getPost().getId()).isPresent() ?
+                        postRepository.findById(mediaItem.getPost().getId()).get() : null;
+
+                // If the post does not exist, make the post null
+                if (post == null) {
+                    mediaItem.setPost(null);
+                } else {
+                    // If the post exists, make sure that the owner of the post is the same as the user
+                    if (post.getOwner().getId() != userInfoDetails.getId()) {
+                        mediaItem.setPost(null);
+                    } else {
+                        mediaItem.setPost(post);
+                    }
+                }
+            }
 
            // Save the media item
             mediaItemRepository.save(mediaItem);
@@ -175,10 +201,7 @@ public class MediaItemController {
             mediaItemToUpdate.setTitle(mediaItem.getTitle());
             mediaItemToUpdate.setAlt(mediaItem.getAlt());
 
-            // If post is present, save it to media item
-            if (mediaItem.getPost() != null) {
-                mediaItemToUpdate.setPost(mediaItem.getPost());
-            }
+            // Post is not updated, it is set when the media item is created
 
             // save the updated media item
             mediaItemRepository.save(mediaItemToUpdate);

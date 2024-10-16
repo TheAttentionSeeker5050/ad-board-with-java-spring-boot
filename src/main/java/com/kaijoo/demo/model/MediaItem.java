@@ -36,7 +36,7 @@ public class MediaItem {
     @ManyToOne
     @JoinColumn(name = "post_id")
     @JsonIgnoreProperties({"mediaItems", "socialLinks", "owner", "tags", "subCategory", "category", "conversations"})
-    private Post post;
+    private Post post = null;
 
     // Constructor
     public MediaItem(

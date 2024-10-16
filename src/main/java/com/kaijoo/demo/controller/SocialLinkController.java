@@ -4,10 +4,8 @@ import com.kaijoo.demo.dto.GetMultipleItemsResponse;
 import com.kaijoo.demo.dto.GetSingleItemsResponse;
 import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
 import com.kaijoo.demo.dto.ItemDeletedResponse;
-import com.kaijoo.demo.model.MediaItem;
-import com.kaijoo.demo.model.SocialLink;
-import com.kaijoo.demo.model.User;
-import com.kaijoo.demo.model.UserInfoDetails;
+import com.kaijoo.demo.model.*;
+import com.kaijoo.demo.repository.PostRepository;
 import com.kaijoo.demo.repository.SocialLinkRepository;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
@@ -29,10 +27,14 @@ public class SocialLinkController {
     private SocialLinkRepository socialLinkRepository;
 
     @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
     private JwtService jwtService;
 
     @Autowired
     private UserService userService;
+
 
     // The routes will be added here
     // Create a social link
@@ -43,6 +45,7 @@ public class SocialLinkController {
             @RequestBody SocialLink socialLink
     ) {
         try {
+
             // Extract email from token
             // take bearer out of token
             String email = jwtService.extractEmail(token.substring(7));
@@ -74,6 +77,29 @@ public class SocialLinkController {
             User owner = new User();
 
             owner.setId(userInfoDetails.getId());
+
+            System.out.println("Post id: " + socialLink.getPost());
+
+            // Explicitly set the post
+            // Use the post id to find the post in the database
+            if (socialLink.getPost() != null) {
+
+                // Make sure that the owner of the post is the same user in this request
+                Post post = postRepository.findById(socialLink.getPost().getId()).isPresent() ?
+                        postRepository.findById(socialLink.getPost().getId()).get() : null;
+
+                // If the post does not exist, make the post null
+                if (post == null) {
+                    socialLink.setPost(null);
+                } else {
+                    // If the post exists, check if the owner of the post is the same as the user in this request
+                    if (post.getOwner().getId() != userInfoDetails.getId()) {
+                        socialLink.setPost(null);
+                    } else {
+                        socialLink.setPost(post);
+                    }
+                }
+            }
 
 
             // set the owner of the social link
@@ -166,10 +192,7 @@ public class SocialLinkController {
             socialLinkToUpdate.setText(socialLink.getText());
             socialLinkToUpdate.setAlt(socialLink.getAlt());
 
-            // if post, set post
-            if (socialLink.getPost() != null) {
-                socialLinkToUpdate.setPost(socialLink.getPost());
-            }
+            // Post is not updated, it is set when the social link is created
 
             socialLinkRepository.save(socialLinkToUpdate);
 

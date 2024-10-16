@@ -9,6 +9,7 @@ import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,7 +35,7 @@ public class UserController {
         return "Welcome this endpoint is not secure";
     }
 
-    @PostMapping("/addNewUser")
+    @PostMapping("/register")
     public RegisterResponse addNewUser(@RequestBody User userInfo) {
         boolean result = service.addUser(userInfo);
 
@@ -85,8 +86,8 @@ public class UserController {
         return "Welcome to Admin Profile";
     }
 
-    @PostMapping("/generateToken")
-    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    @PostMapping("/authenticate")
+    public @ResponseBody ResponseEntity<AuthResponse> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         // use dto AuthResponse to return a json object
         AuthResponse response;
         try {
@@ -95,16 +96,16 @@ public class UserController {
                 String authToken = jwtService.generateToken(authRequest.getEmail());
 
                 response = new AuthResponse(authToken, null);
-                return response;
+                return ResponseEntity.ok(response);
             }
 
             response = new AuthResponse(null, "Invalid credentials");
-            return response;
+            return ResponseEntity.badRequest().body(response);
 
         } catch (UsernameNotFoundException e) {
 
             response = new AuthResponse(null, "User not found");
-            return response;
+            return ResponseEntity.badRequest().body(response);
         }
     }
 

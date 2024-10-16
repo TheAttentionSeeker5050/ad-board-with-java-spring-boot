@@ -37,20 +37,25 @@ public class SecurityConfig {
     // Configuring HttpSecurity
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/welcome", "/auth/addNewUser", "/auth/generateToken").permitAll())
+        return http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/welcome", "/auth/register", "/auth/authenticate").permitAll())
+
+                // auhtorize any get request
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "**").permitAll())
+
+
+                // All post, put and delete requests require authentication
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "**").authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.PUT, "**").authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.DELETE, "**").authenticated())
+
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/user/**").authenticated())
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/admin/**").authenticated())
 
 
-
-                // All post, put and delete requests require authentication
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST).authenticated())
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.PUT).authenticated())
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.DELETE).authenticated())
-
                 // Add the other controller requestMatchers here
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+//                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
