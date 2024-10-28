@@ -16,12 +16,19 @@ import java.util.stream.Collectors;
 public class UserInfoDetails implements UserDetails {
     private int id = 0;
     private String email;
+
+    // This field is not part of the UserDetails interface, so we need to add it
+    @Getter
+    @Setter
+    private String name;
+
     private String password;
     private List<GrantedAuthority> authorities;
 
     public UserInfoDetails(User userInfo) {
         id = userInfo.getId();
         email = userInfo.getEmail();
+        name = userInfo.getName();
         password = userInfo.getPassword();
         authorities = Arrays.stream(userInfo.getRoles().split(","))
                 .map(SimpleGrantedAuthority::new)

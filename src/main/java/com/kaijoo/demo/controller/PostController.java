@@ -172,6 +172,8 @@ public class PostController {
             postToUpdate.setAddress(post.getAddress());
             postToUpdate.setPhone(post.getPhone());
             postToUpdate.setEmail(post.getEmail());
+            postToUpdate.setPrice(post.getPrice());
+            postToUpdate.setThumbnail(post.getThumbnail());
 
             // Get media items and social links from the post body and save them
             if (post.getMediaItems() != null) {

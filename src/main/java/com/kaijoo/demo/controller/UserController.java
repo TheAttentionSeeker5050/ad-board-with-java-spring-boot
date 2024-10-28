@@ -69,6 +69,7 @@ public class UserController {
             response = new UserInfoResponse(
                     userInfoDetails.getId(),
                     userInfoDetails.getUsername(),
+                    userInfoDetails.getName(),
                     userInfoDetails.getAuthorities().toString()
             );
 
@@ -105,6 +106,23 @@ public class UserController {
         } catch (UsernameNotFoundException e) {
 
             response = new AuthResponse(null, "User not found");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // Renew token
+    @PostMapping("/renew-token")
+    public @ResponseBody ResponseEntity<AuthResponse> renewToken(@RequestHeader("Authorization") String token) {
+        AuthResponse response;
+        try {
+            String email = jwtService.extractEmail(token);
+            String authToken = jwtService.generateToken(email);
+
+            response = new AuthResponse(authToken, null);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response = new AuthResponse(null, "Invalid token");
             return ResponseEntity.badRequest().body(response);
         }
     }

@@ -23,6 +23,8 @@ public class Post {
 
     private String title;
     private String description;
+    private double price;
+    private String thumbnail;
     private String address;
     private String phone;
     private String email;
@@ -50,7 +52,7 @@ public class Post {
     // One-to-many relation with User, a post can have one user, but a user can have many posts
     @ManyToOne
     @JoinColumn(name = "owner")
-    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks", "conversations"})
+    @JsonIgnoreProperties({"mediaItems", "posts", "socialLinks", "conversations", "password", "roles"})
     private User owner;
 
 
