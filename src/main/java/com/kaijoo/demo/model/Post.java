@@ -22,7 +22,11 @@ public class Post {
     private int id;
 
     private String title;
+
+    // Make it text to store more data
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private double price;
     private String thumbnail;
     private String address;

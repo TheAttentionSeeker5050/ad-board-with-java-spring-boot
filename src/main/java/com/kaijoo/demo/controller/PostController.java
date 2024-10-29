@@ -298,31 +298,42 @@ public class PostController {
 
     // Get a post by id
     @GetMapping(path="/by-id/{id}")
-    public @ResponseBody ResponseEntity<GetSingleItemsResponse> getPostById(int id) {
-        // Get the Post element
-        Post post = postRepository.findById(id).isPresent() ?
-                postRepository.findById(id).get() : null;
+    public @ResponseBody ResponseEntity<GetSingleItemsResponse> getPostById(
+            @PathVariable("id") Integer id
+    ) {
+        try {
+            // Get the Post element
+            Post post = postRepository.findById(id).isPresent() ?
+                    postRepository.findById(id).get() : null;
 
-        // If post does not exist, return an error
-        if (post == null) {
+            // If post does not exist, return an error
+            if (post == null) {
+                return ResponseEntity.badRequest().body(new GetSingleItemsResponse(
+                        "Post does not exist",
+                        null,
+                        "/posts",
+                        null
+                ));
+            }
+
+            // create a response object
+            GetSingleItemsResponse response = new GetSingleItemsResponse(
+                    "Post found",
+                    "/posts/by-id/" + id,
+                    "/posts",
+                    post
+            );
+
+            // Return the response
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GetSingleItemsResponse(
-                "Post does not exist",
-                null,
-                "/posts",
-                null
+                    "Error getting post: " + e.getMessage(),
+                    null,
+                    "/posts",
+                    null
             ));
         }
-
-        // create a response object
-        GetSingleItemsResponse response = new GetSingleItemsResponse(
-            "Post found",
-            "/posts/by-id/" + id,
-            "/posts",
-            post
-        );
-
-        // Return the response
-        return ResponseEntity.ok().body(response);
     }
 
     // Get all posts, here we will include optional pagination, and sorting,
