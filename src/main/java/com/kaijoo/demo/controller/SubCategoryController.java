@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @Controller // This means that this class is a Controller
 @RequestMapping(path="/sub-categories") // This means URL's start with /subcategories (after Application path)
@@ -248,6 +249,44 @@ public class SubCategoryController {
                     null,
                     "/sub-categories",
                     subCategories);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            // Return the response
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    "Error getting sub-categories: " + e.getMessage(),
+                    "/sub-categories",
+                    null);
+
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // by-category-id/{id}
+    @GetMapping(path="/by-category-id/{id}")
+    public @ResponseBody ResponseEntity<GetMultipleItemsResponse> getSubCategoriesByCategoryId(@PathVariable int id) {
+
+        try {
+            // Find all sub-categories
+            // cast to list of SubCategories, because
+            // the dto does not specify the type of the data field
+            Optional<List<SubCategory>> subCategories = subCategoryRepository.findByCategory_Id(id).isEmpty()
+                    ? Optional.empty() : Optional.of(subCategoryRepository.findByCategory_Id(id));
+
+            // ditch the posts and category field
+            subCategories.ifPresent(subCategories1 -> subCategories1.forEach(
+                    subCategory -> {
+                        subCategory.setPosts(null);
+                        subCategory.setCategory(null);
+                    }
+            ));
+
+            // Return the response
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    null,
+                    "/sub-categories",
+                    subCategories.orElse(null));
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

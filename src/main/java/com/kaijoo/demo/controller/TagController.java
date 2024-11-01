@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @Controller // This means that this class is a Controller
 @RequestMapping(path="/tags")
@@ -81,6 +82,41 @@ public class TagController {
             ItemCreatedOrUpdatedResponse response = new ItemCreatedOrUpdatedResponse(
                     null,
                     "Error creating tag: " + e.getMessage(),
+                    "/tags",
+                    null
+            );
+
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // Autocomplete a tag, receive a get request to /tags/autocomplete-list
+    @GetMapping(path="/autocomplete-list")
+    public @ResponseBody ResponseEntity<GetMultipleItemsResponse> autocompleteTag() {
+        try {
+            // Get all tags from the database, if it could not find any, return an empty list
+            Optional<List<Tag>> tags = Optional.of((List<Tag>) tagRepository.findAll());
+
+            // ditch the posts in the tags
+            tags.ifPresent(tagList -> {
+                for (Tag tag : tagList) {
+                    tag.setPosts(null);
+                }
+            });
+
+            // Make the response content object
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    null,
+                    "/tags",
+                    tags.orElse(null)
+            );
+
+            // return the response using ResponseEntity
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            // return a response with the error message and status code 400 if there is an error
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    "Error getting tags: " + e.getMessage(),
                     "/tags",
                     null
             );

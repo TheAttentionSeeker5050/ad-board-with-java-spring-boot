@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller // This means that this class is a Controller
 @RequestMapping(path="/categories") // This means URL's start with /subcategories (after Application path)
@@ -195,6 +196,38 @@ public class CategoryController {
                     null,
                     "/categories",
                     categories);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            // Prepare the response
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    "Error getting categories: " + e.getMessage(),
+                    "/categories",
+                    null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    // Get all categories
+    @GetMapping(path="autocomplete-list")
+    public @ResponseBody ResponseEntity<GetMultipleItemsResponse> getAutocompleteCategoriesList() {
+        try {
+            // Get all categories, but prevent infinite recursion
+            Optional<List<Category>> categories = categoryRepository.findAll().iterator().hasNext()
+                    ? Optional.of((List<Category>) categoryRepository.findAll()) : Optional.empty();
+
+            // Remove the subcategories and posts, use java optional to prevent null pointer exception
+            categories.ifPresent(cats -> cats.forEach(cat -> {
+                cat.setSubCategories(null);
+                cat.setPosts(null);
+            }));
+
+            // Prepare the response
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    null,
+                    "/categories/autocomplete-list",
+                    categories.orElse(null));
 
             return ResponseEntity.ok(response);
 

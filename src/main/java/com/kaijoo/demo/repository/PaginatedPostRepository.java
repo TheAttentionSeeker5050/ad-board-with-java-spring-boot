@@ -2,6 +2,7 @@ package com.kaijoo.demo.repository;
 
 
 import com.kaijoo.demo.model.Post;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -51,4 +52,7 @@ public interface PaginatedPostRepository extends PagingAndSortingRepository<Post
             "WHERE o.id = :ownerId")
     List<Post> findByOwnerId(@Param("ownerId") int ownerId, Pageable pageable);
 
+    @Query("SELECT p FROM Post p " +
+            "ORDER BY RAND()")
+    List<Post> findRandomPosts(Pageable pageable);
 }

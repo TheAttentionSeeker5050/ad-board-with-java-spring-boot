@@ -15,12 +15,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
+import java.util.UUID;
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Controller // This means that this class is a Controller
 @RequestMapping(path="/posts") // This means URL's start with /posts (after Application path)
@@ -83,6 +95,8 @@ public class PostController {
 
             post.setOwner(owner);
 
+            post.setThumbnail(null);
+
             // Save the post
             postRepository.save(post);
 
@@ -95,15 +109,107 @@ public class PostController {
             );
 
             return ResponseEntity.ok().body(response);
-
-
-
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
                 null,
                 "Error creating post: " + e.getMessage(),
                 "/posts",
                 null
+            ));
+        }
+    }
+
+    // make a post request updating the thumbnail: posts/by-id/${this.postId}/edit-thumbnail
+    // This is a multipart request, thumbnail is a file
+    @PostMapping(path="/by-id/{id}/edit-thumbnail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> updateThumbnail(
+            @PathVariable int id,
+            @RequestHeader("Authorization") String token,
+            @RequestParam("thumbnail") MultipartFile thumbnail
+    ) {
+        try {
+            // Extract email from token and verify user
+            String email = jwtService.extractEmail(token.substring(7));
+            UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
+            boolean userIsValid = jwtService.validateToken(token.substring(7), userInfoDetails);
+
+            if (!userIsValid) {
+                return ResponseEntity.status(401).body(new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "User is not valid",
+                        "/posts",
+                        null
+                ));
+            }
+
+            // Find the post and check ownership
+            Post postToUpdate = postRepository.findById(id).orElse(null);
+            if (postToUpdate == null) {
+                return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "Post does not exist",
+                        "/posts",
+                        null
+                ));
+            }
+            if (postToUpdate.getOwner().getId() != userInfoDetails.getId()) {
+                return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "User is not the owner of the post",
+                        "/posts",
+                        null
+                ));
+            }
+
+            // Validate that the thumbnail is a valid image file
+            if (thumbnail.isEmpty() || !thumbnail.getContentType().startsWith("image")) {
+                return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
+                        null,
+                        "Invalid image file",
+                        "/posts",
+                        null
+                ));
+            }
+
+            // Define the upload directory based on the working directory
+            String workingDir = System.getProperty("user.dir") + File.separator + "src" +
+                    File.separator + "main" + File.separator + "resources" +
+                    File.separator + "public" + File.separator + "thumbnails";
+            // from working dir get /src/main/resources/public
+            System.out.println("Base path: " + workingDir);;
+            File thumbnailDir = new File(workingDir);
+            if (!thumbnailDir.exists()) {
+                thumbnailDir.mkdirs();  // Create directory if it doesn't exist
+            }
+
+            // Get file extension
+            String fileExtension = thumbnail.getOriginalFilename()
+                    .split("\\.")[thumbnail.getOriginalFilename().split("\\.").length - 1];
+
+            // Save the file to the server
+            String fileName = UUID.randomUUID() + "." + fileExtension;
+            thumbnail.transferTo(new File(workingDir + File.separator + fileName));
+
+            // Set the accessible URL path for the thumbnail in the database
+
+            postToUpdate.setThumbnail(fileName);
+            postRepository.save(postToUpdate);
+
+            // Return response with success
+            return ResponseEntity.ok().body(new ItemCreatedOrUpdatedResponse(
+                    "Thumbnail updated",
+                    null,
+                    "/posts",
+                    "/posts/by-id/" + id
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ItemCreatedOrUpdatedResponse(
+                    null,
+                    "Error updating thumbnail: " + e.getMessage(),
+                    "/posts",
+                    null
             ));
         }
     }
@@ -173,7 +279,7 @@ public class PostController {
             postToUpdate.setPhone(post.getPhone());
             postToUpdate.setEmail(post.getEmail());
             postToUpdate.setPrice(post.getPrice());
-            postToUpdate.setThumbnail(post.getThumbnail());
+//            postToUpdate.setThumbnail(post.getThumbnail());
 
             // Get media items and social links from the post body and save them
             if (post.getMediaItems() != null) {
@@ -336,6 +442,59 @@ public class PostController {
         }
     }
 
+    // Get all the post belonging to the user
+    @GetMapping(path="/by-user")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public @ResponseBody ResponseEntity<GetMultipleItemsResponse> getPostsByUser(
+            @RequestHeader("Authorization") String token
+    ) {
+        try {
+            // Extract email from token
+            // take bearer out of token
+            String email = jwtService.extractEmail(token.substring(7));
+
+            // build a json array with the information using the UserInfoDetails class object
+            UserInfoDetails userInfoDetails = (UserInfoDetails) userService.loadUserByUsername(email);
+
+            // validate the media item user
+            boolean userIsValid = jwtService.validateToken(
+                    token.substring(7),
+                    userInfoDetails
+            );
+
+            // If the user is not valid, return an error
+            if (!userIsValid) {
+                return ResponseEntity.status(401).body(new GetMultipleItemsResponse(
+                        "User is not valid",
+                        "/posts",
+                        null
+                ));
+            }
+
+            User user = new User();
+            user.setId(userInfoDetails.getId());
+
+            // Get all posts belonging to the user
+            List<Post> posts = postRepository.findByOwner(user);
+
+            // create a response object
+            GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+                    "Posts found",
+                    "/posts/by-user",
+                    posts
+            );
+
+            // Return the response
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new GetMultipleItemsResponse(
+                    "Error getting posts: " + e.getMessage(),
+                    "/posts",
+                    null
+            ));
+        }
+    }
+
     // Get all posts, here we will include optional pagination, and sorting,
     // so include that in url params
     @GetMapping(path="")
@@ -372,5 +531,51 @@ public class PostController {
         // Return the response
         return ResponseEntity.ok().body(response);
     }
+
+    // Method to get 5 random posts
+    @GetMapping(path="/random")
+    public @ResponseBody ResponseEntity<GetMultipleItemsResponse> getRandomPosts() {
+        // Get 5 random posts from the database
+        List<Post> posts = paginatedPostRepository.findRandomPosts(PageRequest.of(0, 6));
+
+        // create a response object
+        GetMultipleItemsResponse response = new GetMultipleItemsResponse(
+            "Posts found",
+            "/posts/random",
+            posts
+        );
+
+        // Return the response
+        return ResponseEntity.ok().body(response);
+    }
+
+    // Get a thumbnail by filename
+    @GetMapping("/thumbnails/{filename:.+}")
+    public ResponseEntity<Resource> getThumbnail(@PathVariable String filename) {
+        try {
+            // Define the path to the file
+            String workingDir = System.getProperty("user.dir") + File.separator + "src" +
+                    File.separator + "main" + File.separator + "resources" +
+                    File.separator + "public" + File.separator + "thumbnails";
+            Path filePath = Paths.get(workingDir, filename);
+
+            // Check if the file exists
+            if (!Files.exists(filePath)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Load file as resource
+            Resource resource = new UrlResource(filePath.toUri());
+
+            // Return the file as a response
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)  // Adjust based on the file type
+                    .body(resource);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
 }
