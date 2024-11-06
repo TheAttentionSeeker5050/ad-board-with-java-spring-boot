@@ -91,11 +91,14 @@ public class TagController {
     }
 
     // Autocomplete a tag, receive a get request to /tags/autocomplete-list
+    // Make the autocomplete tag with just the name and id, can filter by ?name
     @GetMapping(path="/autocomplete-list")
-    public @ResponseBody ResponseEntity<GetMultipleItemsResponse> autocompleteTag() {
+    public @ResponseBody ResponseEntity<GetMultipleItemsResponse> autocompleteTag(@RequestParam(required = false) String name) {
         try {
             // Get all tags from the database, if it could not find any, return an empty list
-            Optional<List<Tag>> tags = Optional.of((List<Tag>) tagRepository.findAll());
+            Optional<List<Tag>> tags = name == null ?
+                    Optional.of((List<Tag>) tagRepository.findAll()) :
+                    Optional.of((List<Tag>) tagRepository.findAllByNameContaining(name));
 
             // ditch the posts in the tags
             tags.ifPresent(tagList -> {
@@ -360,5 +363,7 @@ public class TagController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+
 
 }

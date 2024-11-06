@@ -5,10 +5,12 @@ import com.kaijoo.demo.dto.GetSingleItemsResponse;
 import com.kaijoo.demo.dto.ItemCreatedOrUpdatedResponse;
 import com.kaijoo.demo.dto.ItemDeletedResponse;
 import com.kaijoo.demo.model.Post;
+import com.kaijoo.demo.model.Tag;
 import com.kaijoo.demo.model.User;
 import com.kaijoo.demo.model.UserInfoDetails;
 import com.kaijoo.demo.repository.PaginatedPostRepository;
 import com.kaijoo.demo.repository.PostRepository;
+import com.kaijoo.demo.repository.TagRepository;
 import com.kaijoo.demo.service.JwtService;
 import com.kaijoo.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class PostController {
 
     @Autowired
     private PaginatedPostRepository paginatedPostRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     // Add jwt service here
     @Autowired
@@ -177,7 +182,6 @@ public class PostController {
                     File.separator + "main" + File.separator + "resources" +
                     File.separator + "public" + File.separator + "thumbnails";
             // from working dir get /src/main/resources/public
-            System.out.println("Base path: " + workingDir);;
             File thumbnailDir = new File(workingDir);
             if (!thumbnailDir.exists()) {
                 thumbnailDir.mkdirs();  // Create directory if it doesn't exist
@@ -299,10 +303,15 @@ public class PostController {
                 postToUpdate.setSubCategory(post.getSubCategory());
             }
 
-            // Get tags from the post body and save them
-            if (post.getTags() != null) {
-                postToUpdate.setTags(post.getTags());
-            }
+            // Make an array of the tags selected, using { id: number }
+            // Use the tags repository to get the tags by id
+            List<Tag> tags = post.getTags();
+
+            tags.replaceAll(tag -> tagRepository.findById(tag.getId()).isPresent() ?
+                    tagRepository.findById(tag.getId()).get() : null);
+
+
+            postToUpdate.setTags(tags);
 
             // Save the post
             postRepository.save(postToUpdate);
