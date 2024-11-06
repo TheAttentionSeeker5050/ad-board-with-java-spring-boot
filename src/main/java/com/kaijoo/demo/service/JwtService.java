@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.Calendar;
 
 @Component
 public class JwtService {
@@ -70,6 +72,15 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
+    // Check if the token is about to expire, this is used to determine if renewal is needed
+    public boolean isTokenExpiring(String token) {
+        Date expiration = extractExpiration(token);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(expiration);
+        calendar.add(Calendar.MINUTE, -5); // Set the threshold (5 minutes before expiration)
+        return calendar.getTime().before(new Date());
+    }
+
     public Boolean validateToken(String token, UserDetails userDetails) {
         String newToken = token;
 
@@ -80,6 +91,27 @@ public class JwtService {
 
         final String email = extractEmail(newToken);
         return (email.equals(userDetails.getUsername()) && !isTokenExpired(newToken));
+    }
+
+    public String renewToken(String token) {
+        if (!isTokenExpired(token)) {
+            // Extract email from the old token
+            String email = extractEmail(token);
+            // Generate a new token
+            return generateToken(email);
+        }
+        return null; // Token can't be renewed if it's expired
+    }
+
+    public String getTokenFromCookies(Cookie[] cookies) {
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("AUTH_TOKEN".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 
 
