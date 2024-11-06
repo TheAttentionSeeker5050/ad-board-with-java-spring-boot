@@ -65,11 +65,11 @@ public class PostController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> createPost(
             HttpServletRequest request,
+            @RequestHeader("Authorization") String token,
             @RequestBody Post post
     ) {
         try {
-            // Retrieve the JWT from cookies
-            String token = jwtService.getTokenFromCookies(request.getCookies());
+            // Use the jwtService to extract the email from the token
             String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
@@ -225,11 +225,11 @@ public class PostController {
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> updatePost(
             @PathVariable int id,
             HttpServletRequest request,
+            @RequestHeader("Authorization") String token,
             @RequestBody Post post
             ) {
         try {
-            // Retrieve the JWT from cookies
-            String token = jwtService.getTokenFromCookies(request.getCookies());
+            // Use the jwtService to extract the email from the token
             String email = jwtService.extractEmail(token);
 
 
@@ -343,11 +343,11 @@ public class PostController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public @ResponseBody ResponseEntity<ItemDeletedResponse> deletePost(
             @PathVariable int id,
+            @RequestHeader("Authorization") String token,
             HttpServletRequest request
     ) {
         try {
-            // Retrieve the JWT from cookies
-            String token = jwtService.getTokenFromCookies(request.getCookies());
+            // Use the jwtService to extract the email from the token
             String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object

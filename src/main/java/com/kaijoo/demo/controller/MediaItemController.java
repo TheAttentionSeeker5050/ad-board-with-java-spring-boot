@@ -51,11 +51,11 @@ public class MediaItemController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> createMediaItem(
             HttpServletRequest request,
+            @RequestHeader("Authorization") String token,
             @RequestBody MediaItem mediaItem
     ) {
         try {
-            // Retrieve the JWT from cookies
-            String token = jwtService.getTokenFromCookies(request.getCookies());
+            // Use the jwtService to extract the email from the token
             String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
@@ -154,11 +154,11 @@ public class MediaItemController {
     public @ResponseBody ResponseEntity<ItemCreatedOrUpdatedResponse> updateMediaItem(
             @PathVariable int id,
             HttpServletRequest request,
+            @RequestHeader("Authorization") String token,
             @RequestBody MediaItem mediaItem
     ) {
         try{
-            // Retrieve the JWT from cookies
-            String token = jwtService.getTokenFromCookies(request.getCookies());
+            // Use the jwtService to extract the email from the token
             String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
@@ -248,11 +248,11 @@ public class MediaItemController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public @ResponseBody ResponseEntity<ItemDeletedResponse> deleteMediaItem(
             @PathVariable int id,
+            @RequestHeader("Authorization") String token,
             HttpServletRequest request
     ) {
         try {
-            // Retrieve the JWT from cookies
-            String token = jwtService.getTokenFromCookies(request.getCookies());
+            // Use the jwtService to extract the email from the token
             String email = jwtService.extractEmail(token);
 
             // build a json array with the information using the UserInfoDetails class object
